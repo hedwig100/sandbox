@@ -1,0 +1,8 @@
+#!/bin/bash
+set -eu
+
+target=$1
+
+mkdir -p build
+g++ src/$target.cpp -o build/$target.o
+./build/$target.o
