@@ -11,8 +11,12 @@ struct Repeat {
                                                      wholeLength(wholeLength) {}
 
     friend std::ostream &operator<<(std::ostream &os, const Repeat &rep) {
-        os << '[' << rep.start << ',' << rep.start + rep.length << ")*" << rep.wholeLength;
+        os << '[' << rep.start << ',' << rep.start + rep.length << "), length:" << rep.wholeLength;
         return os;
+    }
+
+    bool operator==(const Repeat &rep) {
+        return (start == rep.start) && (length == rep.length) && (wholeLength == rep.wholeLength);
     }
 };
 
@@ -22,19 +26,16 @@ std::vector<Repeat> Naive(const std::string &seq) {
     for (int i = 0; i < n; i++) {
         for (int length = 1; length <= (n - i) / 2; length++) {
 
+            // pick only maximal one
+            if (i > 0 && seq[i - 1] == seq[i + length - 1]) continue;
+
             int k = 0, now = i + length;
-            while (now < n) {
-                if (seq[now] != seq[i + k]) break;
+            while (now < n && seq[now] == seq[i + k]) {
                 k++, now++;
                 if (k == length) k = 0;
             }
 
             if ((now - i) / length <= 1) continue;
-
-            // pick only maximal one
-            if (i - length >= 0 && std::equal(
-                                       seq.begin() + i - length, seq.begin() + i,
-                                       seq.begin() + i, seq.begin() + i + length)) continue;
             repeats.emplace_back(i, length, (now - i));
         }
     }
