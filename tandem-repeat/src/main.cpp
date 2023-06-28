@@ -4,14 +4,14 @@
 #include <vector>
 
 struct Repeat {
-    int start, length, n_repeat;
+    int start, length, wholeLength;
     Repeat() {}
-    Repeat(int start, int length, int n_repeat) : start(start),
-                                                  length(length),
-                                                  n_repeat(n_repeat) {}
+    Repeat(int start, int length, int wholeLength) : start(start),
+                                                     length(length),
+                                                     wholeLength(wholeLength) {}
 
     friend std::ostream &operator<<(std::ostream &os, const Repeat &rep) {
-        os << '[' << rep.start << ',' << rep.start + rep.length << ")*" << rep.n_repeat;
+        os << '[' << rep.start << ',' << rep.start + rep.length << ")*" << rep.wholeLength;
         return os;
     }
 };
@@ -35,14 +35,14 @@ std::vector<Repeat> Naive(const std::string &seq) {
             if (i - length >= 0 && std::equal(
                                        seq.begin() + i - length, seq.begin() + i,
                                        seq.begin() + i, seq.begin() + i + length)) continue;
-            repeats.emplace_back(i, length, (now - i) / length);
+            repeats.emplace_back(i, length, (now - i));
         }
     }
     return repeats;
 }
 
 std::vector<Repeat> DivideConquer(const std::string &seq) {
-    std::cerr << "Seq: " << seq << '\n';
+    // std::cerr << "Seq: " << seq << '\n';
     int n = seq.size(), m = n / 2;
 
     // base case
@@ -52,7 +52,6 @@ std::vector<Repeat> DivideConquer(const std::string &seq) {
     std::vector<Repeat> repeats;
     auto L = DivideConquer(seq.substr(0, m));
     auto R = DivideConquer(seq.substr(m, n - m));
-    repeats.resize(L.size() + R.size());
     std::copy(L.begin(), L.end(), std::back_inserter(repeats));
     std::transform(
         R.begin(), R.end(), std::back_inserter(repeats), [&m](Repeat &rep) {
@@ -81,19 +80,103 @@ std::vector<Repeat> DivideConquer(const std::string &seq) {
             // [left,right) はtandem-repeatになっている(ちょうど周期とは限らない).
             if (right - left < 2 * length) continue;
 
-            std::cout << "length: " << length << '\n'
-                      << "n: " << n << '\n'
-                      << "left: " << left << '\n'
-                      << "right: " << right << '\n';
+            // std::cout << "length: " << length << '\n'
+            //           << "rev: " << rev << '\n'
+            //           << "n: " << n << '\n'
+            //           << "left: " << left << '\n'
+            //           << "right: " << right << "\n\n";
             if (rev)
-                repeats.emplace_back(n - right, length, (right - left) / length);
+                repeats.emplace_back(n - right, length, right - left);
             else
-                repeats.emplace_back(left, length, (right - left) / length);
+                repeats.emplace_back(left, length, right - left);
         }
     };
 
     subprob(seq.begin(), m, false);
     subprob(seq.rbegin(), n - 1 - m, true);
+
+    return repeats;
+}
+
+template <typename T>
+std::vector<int> Z_algorithm(const T &s, const T &send) {
+    int l = (int)(send - s);
+    if (l == 0)
+        return {};
+    std::vector<int> Z(l);
+    Z[0]  = l;
+    int i = 1, j = 0;
+    while (i < l) {
+        while (i + j < l && s[j] == s[i + j])
+            j++;
+        Z[i] = j;
+
+        if (j == 0) {
+            i++;
+            continue;
+        }
+        int k = 1;
+        while (k < j && k + Z[k] < j) {
+            Z[i + k] = Z[k];
+            k++;
+        }
+        i += k;
+        j -= k;
+    }
+
+    return Z;
+}
+
+std::vector<Repeat> DivideConquerFast(std::string seq) {
+    // std::cerr << "Seq: " << seq << '\n';
+    int n = seq.size(), m = n / 2;
+
+    // base case
+    if (n <= 1)
+        return {};
+
+    std::vector<Repeat> repeats;
+    auto L = DivideConquerFast(seq.substr(0, m));
+    auto R = DivideConquerFast(seq.substr(m, n - m));
+    std::copy(L.begin(), L.end(), std::back_inserter(repeats));
+    std::transform(
+        R.begin(), R.end(), std::back_inserter(repeats), [&m](Repeat &rep) {
+            rep.start += m;
+            return rep;
+        });
+
+    auto subprob = [&n, &repeats](const std::string &s, int m, bool rev) {
+        auto Zl = Z_algorithm(s.rbegin() + n - m, s.rend());
+        Zl.push_back(0);
+        std::string t(s.begin() + m, s.end());
+        std::copy(s.begin(), s.end(), std::back_inserter(t));
+        auto Zr = Z_algorithm(t.begin(), t.end());
+
+        for (int length = 1; length <= m; length++) {
+
+            // できるだけ左に行く.
+            int left = m - length - Zl[length];
+
+            // できるだけ右に行く.
+            int right = std::min(m + Zr[n - length], n);
+
+            // [left,right) はtandem-repeatになっている(ちょうど周期とは限らない).
+            if (right - left < 2 * length) continue;
+
+            // std::cout << "length: " << length << '\n'
+            //           << "n: " << n << '\n'
+            //           << "left: " << left << '\n'
+            //           << "right: " << right << '\n';
+            if (rev)
+                repeats.emplace_back(n - right, length, right - left);
+            else
+                repeats.emplace_back(left, length, right - left);
+        }
+    };
+
+    subprob(seq, m, false);
+    std::reverse(seq.begin(), seq.end());
+    subprob(seq, n - 1 - m, true);
 
     return repeats;
 }
@@ -110,6 +193,11 @@ int main() {
 
     std::cout << "DivideConquer:\n";
     repeats = DivideConquer(seq);
+    for (const auto &rep : repeats)
+        std::cout << rep << '\n';
+
+    std::cout << "DivideConquerFast:\n";
+    repeats = DivideConquerFast(seq);
     for (const auto &rep : repeats)
         std::cout << rep << '\n';
     return 0;
