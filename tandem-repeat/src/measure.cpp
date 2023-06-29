@@ -5,7 +5,7 @@ double Measure(std::function<void(std::string)> f, const std::string &seq) {
     start = clock();
     f(seq);
     end = clock();
-    return (end - start) / CLOCKS_PER_SEC;
+    return static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
 }
 
 int main() {
@@ -16,7 +16,7 @@ int main() {
     auto t1 = Measure([](std::string s) { removeNonMaximal(DivideConquer(s)); }, seq);
     auto t2 = Measure([](std::string s) { removeNonMaximal(DivideConquerFast(s)); }, seq);
 
-    std::cout << "Naive:" << t0 << "s, DivideConquer: " << t1 << "s, DivideConquerFast: " << t2 << "s \n";
+    std::cout << "Naive:" << t0 << "[ms], DivideConquer: " << t1 << "[ms], DivideConquerFast: " << t2 << "[ms] \n";
 
     return 0;
 }
