@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,10 @@ struct Repeat {
     friend std::ostream &operator<<(std::ostream &os, const Repeat &rep) {
         os << '[' << rep.start << ',' << rep.start + rep.length << "), period: " << rep.period;
         return os;
+    }
+
+    bool operator==(const Repeat &rep) const {
+        return (start == rep.start) && (period == rep.period) && (length == rep.length);
     }
 
     bool operator<(const Repeat &rep) {
@@ -214,24 +219,45 @@ std::vector<Repeat> removeNonMaximal(std::vector<Repeat> repeats) {
     return answer;
 }
 
-int main() {
-    std::cout << "Input String:\n";
-    std::string seq;
-    std::cin >> seq;
+/**
+ * Random Generator
+ */
 
-    std::cout << "Naive:\n";
-    auto repeats = removeNonMaximal(Naive(seq));
-    for (const auto &rep : repeats)
-        std::cout << rep << '\n';
+template <class T>
+class RandomGenerator {
+  private:
+    std::random_device seed_gen;
+    std::mt19937 engine;
+    std::uniform_int_distribution<T> rnd;
+    T lower, upper;
 
-    std::cout << "DivideConquer:\n";
-    repeats = removeNonMaximal(DivideConquer(seq));
-    for (const auto &rep : repeats)
-        std::cout << rep << '\n';
+  public:
+    RandomGenerator() {}
+    RandomGenerator(T lower, T upper) : engine(seed_gen()),
+                                        lower(lower),
+                                        upper(upper),
+                                        rnd(lower, upper) {}
 
-    std::cout << "DivideConquerFast:\n";
-    repeats = removeNonMaximal(DivideConquerFast(seq));
-    for (const auto &rep : repeats)
-        std::cout << rep << '\n';
-    return 0;
-}
+    T generate() {
+        return rnd(engine);
+    }
+};
+
+template <>
+class RandomGenerator<std::string> {
+    RandomGenerator<int> rg;
+
+  public:
+    RandomGenerator() : rg(0, 1) {
+    }
+
+    std::string generate(int length) {
+        std::string s;
+        for (int i = 0; i < length; i++)
+            if (rg.generate() == 0)
+                s += '0';
+            else
+                s += '1';
+        return s;
+    }
+};
