@@ -4,18 +4,18 @@
 #include <vector>
 
 struct Repeat {
-    int start, length, wholeLength;
+    int start, period, length;
     Repeat() {}
-    Repeat(int start, int length, int wholeLength) : start(start),
-                                                     length(length),
-                                                     wholeLength(wholeLength) {}
+    Repeat(int start, int period, int length) : start(start),
+                                                period(period),
+                                                length(length) {}
 
     inline int end() const {
-        return start + wholeLength;
+        return start + length;
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Repeat &rep) {
-        os << '[' << rep.start << ',' << rep.start + rep.length << "), length:" << rep.wholeLength;
+        os << '[' << rep.start << ',' << rep.start + rep.length << "), period: " << rep.period;
         return os;
     }
 
@@ -25,7 +25,7 @@ struct Repeat {
         else if (end() != rep.end())
             return end() < rep.end();
         else
-            return length < rep.length;
+            return period < rep.period;
     }
 };
 
@@ -33,43 +33,38 @@ std::vector<Repeat> Naive(const std::string &seq) {
     int n = seq.size();
     std::vector<Repeat> repeats;
     for (int i = 0; i < n; i++) {
-        for (int length = 1; length <= (n - i) / 2; length++) {
+        for (int period = 1; period <= (n - i) / 2; period++) {
 
             // pick only maximal one
-            if (i > 0 && seq[i - 1] == seq[i + length - 1]) continue;
+            if (i > 0 && seq[i - 1] == seq[i + period - 1]) continue;
 
-            int k = 0, now = i + length;
+            int k = 0, now = i + period;
             while (now < n && seq[now] == seq[i + k]) {
                 k++, now++;
-                if (k == length) k = 0;
+                if (k == period) k = 0;
             }
 
-            if ((now - i) / length <= 1) continue;
-            repeats.emplace_back(i, length, (now - i));
+            if ((now - i) / period <= 1) continue;
+            repeats.emplace_back(i, period, (now - i));
         }
     }
 
     return repeats;
 }
 
-std::vector<Repeat> DivideConquer(const std::string &seq) {
-    // std::cerr << "Seq: " << seq << '\n';
-    int n = seq.size(), m = n / 2;
-
-    // base case
-    if (n <= 1)
-        return {};
-
-    std::vector<Repeat> repeats;
-    auto L = DivideConquer(seq.substr(0, m));
-    auto R = DivideConquer(seq.substr(m, n - m));
+void copyMaximal(
+    std::vector<Repeat> &repeats,
+    const std::string &seq,
+    int m,
+    std::vector<Repeat> &&L,
+    std::vector<Repeat> &&R) {
 
     // Lのうち極大なもののみcopyする.
     std::copy_if(L.begin(), L.end(), std::back_inserter(repeats), [&m, &seq](const Repeat &rep) {
         int end = rep.end();
         if (end != m)
             return true;
-        if (seq[end] == seq[rep.start + rep.wholeLength % rep.length])
+        if (seq[end] == seq[rep.start + rep.length % rep.period])
             return false;
         return true;
     });
@@ -82,41 +77,49 @@ std::vector<Repeat> DivideConquer(const std::string &seq) {
         int start = rep.start;
         if (start != m)
             return true;
-        if (start > 0 && seq[start - 1] == seq[start + rep.length - 1])
+        if (start > 0 && seq[start - 1] == seq[start + rep.period - 1])
             return false;
         return true;
     });
+}
+
+std::vector<Repeat> DivideConquer(const std::string &seq) {
+    int n = seq.size(), m = n / 2;
+
+    // base case
+    if (n <= 1)
+        return {};
+
+    std::vector<Repeat> repeats;
+    auto L = DivideConquer(seq.substr(0, m));
+    auto R = DivideConquer(seq.substr(m, n - m));
+    copyMaximal(repeats, seq, m, std::move(L), std::move(R));
 
     auto subprob = [&n, &repeats](const auto &s, int m, bool rev) {
-        for (int length = 1; length <= m; length++) {
+        for (int period = 1; period <= m; period++) {
 
             // できるだけ左に行く.
-            int left = m - length, kl = 0;
-            while (left >= 0 && s[left] == s[m - length + kl]) {
+            int left = m - period, kl = 0;
+            while (left >= 0 && s[left] == s[m - period + kl]) {
                 left--, kl--;
-                if (kl == -1) kl = length - 1;
+                if (kl == -1) kl = period - 1;
             }
             left++;
 
             // できるだけ右に行く.
             int right = m, kr = 0;
-            while (right < n && s[right] == s[m - length + kr]) {
+            while (right < n && s[right] == s[m - period + kr]) {
                 right++, kr++;
-                if (kr == length) kr = 0;
+                if (kr == period) kr = 0;
             }
 
             // [left,right) はtandem-repeatになっている(ちょうど周期とは限らない).
-            if (right - left < 2 * length) continue;
+            if (right - left < 2 * period) continue;
 
-            // std::cout << "length: " << length << '\n'
-            //           << "rev: " << rev << '\n'
-            //           << "n: " << n << '\n'
-            //           << "left: " << left << '\n'
-            //           << "right: " << right << "\n\n";
             if (rev)
-                repeats.emplace_back(n - right, length, right - left);
+                repeats.emplace_back(n - right, period, right - left);
             else
-                repeats.emplace_back(left, length, right - left);
+                repeats.emplace_back(left, period, right - left);
         }
     };
 
@@ -166,29 +169,7 @@ std::vector<Repeat> DivideConquerFast(std::string seq) {
     std::vector<Repeat> repeats;
     auto L = DivideConquerFast(seq.substr(0, m));
     auto R = DivideConquerFast(seq.substr(m, n - m));
-
-    // Lのうち極大なもののみcopyする.
-    std::copy_if(L.begin(), L.end(), std::back_inserter(repeats), [&m, &seq](const Repeat &rep) {
-        int end = rep.end();
-        if (end != m)
-            return true;
-        if (seq[end] == seq[rep.start + rep.wholeLength % rep.length])
-            return false;
-        return true;
-    });
-
-    // Rのうち極大なもののみcopyする.
-    std::for_each(R.begin(), R.end(), [&m](Repeat &rep) {
-        return rep.start += m;
-    });
-    std::copy_if(R.begin(), R.end(), std::back_inserter(repeats), [&m, &seq](const Repeat &rep) {
-        int start = rep.start;
-        if (start != m)
-            return true;
-        if (start > 0 && seq[start - 1] == seq[start + rep.length - 1])
-            return false;
-        return true;
-    });
+    copyMaximal(repeats, seq, m, std::move(L), std::move(R));
 
     auto subprob = [&n, &repeats](const std::string &s, int m, bool rev) {
         auto Zl = Z_algorithm(s.rbegin() + n - m, s.rend());
@@ -197,25 +178,21 @@ std::vector<Repeat> DivideConquerFast(std::string seq) {
         std::copy(s.begin(), s.end(), std::back_inserter(t));
         auto Zr = Z_algorithm(t.begin(), t.end());
 
-        for (int length = 1; length <= m; length++) {
+        for (int period = 1; period <= m; period++) {
 
             // できるだけ左に行く.
-            int left = m - length - Zl[length];
+            int left = m - period - Zl[period];
 
             // できるだけ右に行く.
-            int right = std::min(m + Zr[n - length], n);
+            int right = std::min(m + Zr[n - period], n);
 
             // [left,right) はtandem-repeatになっている(ちょうど周期とは限らない).
-            if (right - left < 2 * length) continue;
+            if (right - left < 2 * period) continue;
 
-            // std::cout << "length: " << length << '\n'
-            //           << "n: " << n << '\n'
-            //           << "left: " << left << '\n'
-            //           << "right: " << right << '\n';
             if (rev)
-                repeats.emplace_back(n - right, length, right - left);
+                repeats.emplace_back(n - right, period, right - left);
             else
-                repeats.emplace_back(left, length, right - left);
+                repeats.emplace_back(left, period, right - left);
         }
     };
 
