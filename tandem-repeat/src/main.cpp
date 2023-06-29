@@ -10,13 +10,22 @@ struct Repeat {
                                                      length(length),
                                                      wholeLength(wholeLength) {}
 
+    inline int end() const {
+        return start + wholeLength;
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const Repeat &rep) {
         os << '[' << rep.start << ',' << rep.start + rep.length << "), length:" << rep.wholeLength;
         return os;
     }
 
-    bool operator==(const Repeat &rep) {
-        return (start == rep.start) && (length == rep.length) && (wholeLength == rep.wholeLength);
+    bool operator<(const Repeat &rep) {
+        if (start != rep.start)
+            return (start < rep.start);
+        else if (end() != rep.end())
+            return end() < rep.end();
+        else
+            return length < rep.length;
     }
 };
 
@@ -39,6 +48,7 @@ std::vector<Repeat> Naive(const std::string &seq) {
             repeats.emplace_back(i, length, (now - i));
         }
     }
+
     return repeats;
 }
 
@@ -53,12 +63,29 @@ std::vector<Repeat> DivideConquer(const std::string &seq) {
     std::vector<Repeat> repeats;
     auto L = DivideConquer(seq.substr(0, m));
     auto R = DivideConquer(seq.substr(m, n - m));
-    std::copy(L.begin(), L.end(), std::back_inserter(repeats));
-    std::transform(
-        R.begin(), R.end(), std::back_inserter(repeats), [&m](Repeat &rep) {
-            rep.start += m;
-            return rep;
-        });
+
+    // Lのうち極大なもののみcopyする.
+    std::copy_if(L.begin(), L.end(), std::back_inserter(repeats), [&m, &seq](const Repeat &rep) {
+        int end = rep.end();
+        if (end != m)
+            return true;
+        if (seq[end] == seq[rep.start + rep.wholeLength % rep.length])
+            return false;
+        return true;
+    });
+
+    // Rのうち極大なもののみcopyする.
+    std::for_each(R.begin(), R.end(), [&m](Repeat &rep) {
+        return rep.start += m;
+    });
+    std::copy_if(R.begin(), R.end(), std::back_inserter(repeats), [&m, &seq](const Repeat &rep) {
+        int start = rep.start;
+        if (start != m)
+            return true;
+        if (start > 0 && seq[start - 1] == seq[start + rep.length - 1])
+            return false;
+        return true;
+    });
 
     auto subprob = [&n, &repeats](const auto &s, int m, bool rev) {
         for (int length = 1; length <= m; length++) {
@@ -66,8 +93,8 @@ std::vector<Repeat> DivideConquer(const std::string &seq) {
             // できるだけ左に行く.
             int left = m - length, kl = 0;
             while (left >= 0 && s[left] == s[m - length + kl]) {
-                left--, kl++;
-                if (kl == length) kl = 0;
+                left--, kl--;
+                if (kl == -1) kl = length - 1;
             }
             left++;
 
@@ -139,12 +166,29 @@ std::vector<Repeat> DivideConquerFast(std::string seq) {
     std::vector<Repeat> repeats;
     auto L = DivideConquerFast(seq.substr(0, m));
     auto R = DivideConquerFast(seq.substr(m, n - m));
-    std::copy(L.begin(), L.end(), std::back_inserter(repeats));
-    std::transform(
-        R.begin(), R.end(), std::back_inserter(repeats), [&m](Repeat &rep) {
-            rep.start += m;
-            return rep;
-        });
+
+    // Lのうち極大なもののみcopyする.
+    std::copy_if(L.begin(), L.end(), std::back_inserter(repeats), [&m, &seq](const Repeat &rep) {
+        int end = rep.end();
+        if (end != m)
+            return true;
+        if (seq[end] == seq[rep.start + rep.wholeLength % rep.length])
+            return false;
+        return true;
+    });
+
+    // Rのうち極大なもののみcopyする.
+    std::for_each(R.begin(), R.end(), [&m](Repeat &rep) {
+        return rep.start += m;
+    });
+    std::copy_if(R.begin(), R.end(), std::back_inserter(repeats), [&m, &seq](const Repeat &rep) {
+        int start = rep.start;
+        if (start != m)
+            return true;
+        if (start > 0 && seq[start - 1] == seq[start + rep.length - 1])
+            return false;
+        return true;
+    });
 
     auto subprob = [&n, &repeats](const std::string &s, int m, bool rev) {
         auto Zl = Z_algorithm(s.rbegin() + n - m, s.rend());
@@ -182,23 +226,34 @@ std::vector<Repeat> DivideConquerFast(std::string seq) {
     return repeats;
 }
 
+std::vector<Repeat> removeNonMaximal(std::vector<Repeat> repeats) {
+    std::sort(repeats.begin(), repeats.end());
+    std::vector<Repeat> answer;
+    for (const auto &rep : repeats) {
+        if (answer.size() > 0 && answer.back().start == rep.start && answer.back().end() == rep.end())
+            continue;
+        answer.push_back(rep);
+    }
+    return answer;
+}
+
 int main() {
     std::cout << "Input String:\n";
     std::string seq;
     std::cin >> seq;
 
     std::cout << "Naive:\n";
-    auto repeats = Naive(seq);
+    auto repeats = removeNonMaximal(Naive(seq));
     for (const auto &rep : repeats)
         std::cout << rep << '\n';
 
     std::cout << "DivideConquer:\n";
-    repeats = DivideConquer(seq);
+    repeats = removeNonMaximal(DivideConquer(seq));
     for (const auto &rep : repeats)
         std::cout << rep << '\n';
 
     std::cout << "DivideConquerFast:\n";
-    repeats = DivideConquerFast(seq);
+    repeats = removeNonMaximal(DivideConquerFast(seq));
     for (const auto &rep : repeats)
         std::cout << rep << '\n';
     return 0;
