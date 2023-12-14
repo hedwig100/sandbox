@@ -10,3 +10,7 @@ edition = "2021"
 [[bin]]
 name = "mutex"
 path = "src/mutex.rs"
+
+[[bin]]
+name = "condvar"
+path = "src/condvar.rs"
