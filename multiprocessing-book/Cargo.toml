@@ -14,3 +14,7 @@ path = "src/mutex.rs"
 [[bin]]
 name = "condvar"
 path = "src/condvar.rs"
+
+[[bin]]
+name = "rwlock"
+path = "src/rwlock.rs"
