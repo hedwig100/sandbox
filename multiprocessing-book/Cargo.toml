@@ -18,3 +18,7 @@ path = "src/condvar.rs"
 [[bin]]
 name = "rwlock"
 path = "src/rwlock.rs"
+
+[[bin]]
+name = "semaphore_test"
+path = "src/semaphore_test.rs"
