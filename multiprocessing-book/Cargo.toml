@@ -22,3 +22,7 @@ path = "src/rwlock.rs"
 [[bin]]
 name = "semaphore_test"
 path = "src/semaphore_test.rs"
+
+[[bin]]
+name = "channel"
+path = "src/channel.rs"
