@@ -6,6 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+futures = "0.3.13"
+nix = "0.20.0"
 
 [[bin]]
 name = "mutex"
@@ -26,3 +28,7 @@ path = "src/semaphore_test.rs"
 [[bin]]
 name = "channel"
 path = "src/channel.rs"
+
+[[bin]]
+name = "parallel_server"
+path = "src/parallel_server.rs"
