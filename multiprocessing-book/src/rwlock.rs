@@ -9,7 +9,7 @@ fn read(lock: Arc<RwLock<i32>>) {
 
 fn write(lock: Arc<RwLock<i32>>) {
     let mut w = lock.write().unwrap();
-    *w = *w + 1;
+    *w += 1;
     println!("Add 1");
 }
 

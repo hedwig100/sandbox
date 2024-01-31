@@ -8,10 +8,10 @@ fn main() {
         let stream0 = stream.try_clone().unwrap();
         let mut reader = BufReader::new(stream0);
         let mut writer = BufWriter::new(stream);
-        
+
         let mut buf = String::new();
         reader.read_line(&mut buf).unwrap();
-        writer.write(buf.as_bytes()).unwrap();
+        writer.write_all(buf.as_bytes()).unwrap();
         writer.flush().unwrap();
     }
 }

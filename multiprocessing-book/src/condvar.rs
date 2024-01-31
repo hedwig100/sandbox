@@ -12,7 +12,7 @@ fn child(id: u32, p: Arc<(Mutex<bool>, Condvar)>) {
 }
 
 fn parent(p: Arc<(Mutex<bool>, Condvar)>) {
-    let &(ref lock, ref cvar) = &*p;
+    let (lock, cvar) = &*p;
     let mut started = lock.lock().unwrap();
     *started = true;
     cvar.notify_all();
