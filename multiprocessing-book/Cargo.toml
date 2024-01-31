@@ -32,3 +32,7 @@ path = "src/channel.rs"
 [[bin]]
 name = "parallel_server"
 path = "src/parallel_server.rs"
+
+[[bin]]
+name = "async_server"
+path = "src/async_server.rs"
