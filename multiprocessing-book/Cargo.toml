@@ -40,3 +40,7 @@ path = "src/async_server.rs"
 [[bin]]
 name = "coroutine"
 path = "src/coroutine.rs"
+
+[[bin]]
+name = "coroutine_schedule"
+path = "src/coroutine_schedule.rs"
