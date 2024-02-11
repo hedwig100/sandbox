@@ -10,6 +10,7 @@ use crate::adder::add;
 
 fn main() {
     println!("{}", add::add(1, 2));   
+    println!("{}", adder::add::aaa());   
     println!("{}", adder::sub::sub(1, 2));
     println!("{}", mul::mul(1, 2));
     println!("{}", mul::add_mul(1, 2,5));
