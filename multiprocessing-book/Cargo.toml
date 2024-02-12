@@ -62,3 +62,7 @@ path = "src/green_main.rs"
 [[bin]]
 name = "actor_main"
 path = "src/green_actor_main.rs"
+
+[[bin]]
+name = "fair_lock"
+path = "src/fair_lock_main.rs"
