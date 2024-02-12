@@ -58,3 +58,7 @@ path = "src/async_tokio.rs"
 [[bin]]
 name = "green_main"
 path = "src/green_main.rs"
+
+[[bin]]
+name = "actor_main"
+path = "src/green_actor_main.rs"

@@ -1,5 +1,6 @@
 use nix::sys::mman::{mprotect, ProtFlags};
 use std::alloc::Layout;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::LinkedList;
 use std::ffi::c_void;
@@ -20,6 +21,12 @@ static mut CONTEXTS: LinkedList<Box<Context>> = LinkedList::new();
 // Set of thread Ids
 static mut ID: *mut HashSet<u64> = ptr::null_mut();
 
+// Message queue
+static mut MESSAGES: *mut MappedList<u64> = ptr::null_mut();
+
+// Waiting threads set
+static mut WAITING: *mut HashMap<u64, Box<Context>> = ptr::null_mut();
+
 fn get_id() -> u64 {
     loop {
         let rnd = rand::random::<u64>();
@@ -29,6 +36,44 @@ fn get_id() -> u64 {
                 return rnd;
             }
         }
+    }
+}
+
+struct MappedList<T> {
+    map: HashMap<u64, LinkedList<T>>,
+}
+
+impl<T> MappedList<T> {
+    fn new() -> Self {
+        MappedList {
+            map: HashMap::new(),
+        }
+    }
+
+    fn push_back(&mut self, key: u64, val: T) {
+        if let Some(list) = self.map.get_mut(&key) {
+            list.push_back(val);
+        } else {
+            let mut list = LinkedList::new();
+            list.push_back(val);
+            self.map.insert(key, list);
+        }
+    }
+
+    fn pop_front(&mut self, key: u64) -> Option<T> {
+        if let Some(list) = self.map.get_mut(&key) {
+            let var = list.pop_front();
+            if list.is_empty() {
+                self.map.remove(&key);
+            }
+            var
+        } else {
+            None
+        }
+    }
+
+    fn clear(&mut self) {
+        self.map.clear();
     }
 }
 
@@ -126,6 +171,42 @@ pub fn schedule() {
     }
 }
 
+pub fn send(key: u64, msg: u64) {
+    unsafe {
+        (*MESSAGES).push_back(key, msg);
+        if let Some(ctx) = (*WAITING).remove(&key) {
+            CONTEXTS.push_back(ctx);
+        }
+        schedule();
+    }
+}
+
+pub fn recv() -> Option<u64> {
+    unsafe {
+        let key = CONTEXTS.front().unwrap().id;
+
+        if let Some(msg) = (*MESSAGES).pop_front(key) {
+            return Some(msg);
+        }
+
+        if CONTEXTS.len() == 1 {
+            panic!("deadlock");
+        }
+
+        let mut ctx = CONTEXTS.pop_front().unwrap();
+        let regs = ctx.get_regs_mut();
+        (*WAITING).insert(key, ctx);
+
+        if set_context(regs) == 0 {
+            let next = CONTEXTS.front().unwrap();
+            switch_context(next.get_regs());
+        }
+
+        rm_unused_stack();
+        (*MESSAGES).pop_front(key)
+    }
+}
+
 extern "C" fn entry_point() {
     unsafe {
         let ctx = CONTEXTS.front().unwrap();
@@ -155,6 +236,12 @@ pub fn spawn_from_main(func: Entry, stack_size: usize) {
 
         CTX_MAIN = Some(Box::new(Registers::new(0)));
         if let Some(ctx) = &mut CTX_MAIN {
+            let mut msgs = MappedList::new();
+            MESSAGES = &mut msgs as *mut MappedList<u64>;
+
+            let mut waiting = HashMap::new();
+            WAITING = &mut waiting as *mut HashMap<u64, Box<Context>>;
+
             let mut ids = HashSet::new();
             ID = &mut ids as *mut HashSet<u64>;
 
@@ -168,6 +255,8 @@ pub fn spawn_from_main(func: Entry, stack_size: usize) {
             CTX_MAIN = None;
             CONTEXTS.clear();
 
+            MESSAGES = ptr::null_mut();
+            WAITING = ptr::null_mut();
             ID = ptr::null_mut();
             ids.clear();
         }
