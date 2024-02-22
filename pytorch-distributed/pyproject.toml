@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "sandbox-mitou"
+version = "0.1.0"
+description = ""
+authors = ["hedwig100 <shota.in26@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "^2.2.0"
+torchvision = "^0.17.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.8.0"
+black = "^24.2.0"
+isort = "^5.13.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 80
+
+[tool.mypy]
+ignore_missing_imports = true
