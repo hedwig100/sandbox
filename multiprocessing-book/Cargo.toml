@@ -70,3 +70,7 @@ path = "src/fair_lock_main.rs"
 [[bin]]
 name = "mcs_lock"
 path = "src/mcs_lock.rs"
+
+[[bin]]
+name = "tl2_main"
+path = "src/tl2_main.rs"
