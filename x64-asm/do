@@ -1,0 +1,17 @@
+#/bin/sh
+set -eux
+
+filepath_without_ext=$1
+
+as -o src/$filepath_without_ext.out src/$filepath_without_ext.s
+
+## Link to libc
+## Probably, these paths below are different in your environment.
+## Ref: https://stackoverflow.com/questions/3577922/how-to-link-a-gas-assembly-program-that-uses-the-c-standard-library-with-ld-with
+ld -o src/$filepath_without_ext.o \
+    -dynamic-linker /lib64/ld-linux-x86-64.so.2 \
+    /usr/lib/x86_64-linux-gnu/crt1.o /usr/lib/x86_64-linux-gnu/crti.o \
+    -lc src/$filepath_without_ext.out /usr/lib/x86_64-linux-gnu/crtn.o
+
+./src/$filepath_without_ext.o
+
