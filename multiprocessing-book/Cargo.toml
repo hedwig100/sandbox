@@ -1,0 +1,76 @@
+[package]
+name = "multiprocessing-book"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures = "0.3.13"
+nix = "0.20.0"
+rand = "0.8.3"
+tokio = { version = "1.4.0", features = ["full"] }
+
+[[bin]]
+name = "mutex"
+path = "src/mutex.rs"
+
+[[bin]]
+name = "condvar"
+path = "src/condvar.rs"
+
+[[bin]]
+name = "rwlock"
+path = "src/rwlock.rs"
+
+[[bin]]
+name = "semaphore_test"
+path = "src/semaphore_test.rs"
+
+[[bin]]
+name = "channel"
+path = "src/channel.rs"
+
+[[bin]]
+name = "parallel_server"
+path = "src/parallel_server.rs"
+
+[[bin]]
+name = "async_server"
+path = "src/async_server.rs"
+
+[[bin]]
+name = "coroutine"
+path = "src/coroutine.rs"
+
+[[bin]]
+name = "coroutine_schedule"
+path = "src/coroutine_schedule.rs"
+
+[[bin]]
+name = "async_runtime"
+path = "src/async_runtime.rs"
+
+[[bin]]
+name = "async_tokio"
+path = "src/async_tokio.rs"
+
+[[bin]]
+name = "green_main"
+path = "src/green_main.rs"
+
+[[bin]]
+name = "actor_main"
+path = "src/green_actor_main.rs"
+
+[[bin]]
+name = "fair_lock"
+path = "src/fair_lock_main.rs"
+
+[[bin]]
+name = "mcs_lock"
+path = "src/mcs_lock.rs"
+
+[[bin]]
+name = "tl2_main"
+path = "src/tl2_main.rs"
