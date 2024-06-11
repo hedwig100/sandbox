@@ -7,10 +7,8 @@ namespace hash {
 
 const int kHashSize = 100;
 
-int hash(std::string str) {
-    return std::stoi(str) % kHashSize;
-}
+int hash(std::string str) { return std::stoi(str) % kHashSize; }
 
-}
+} // namespace hash
 
 #endif // _HASH_H
