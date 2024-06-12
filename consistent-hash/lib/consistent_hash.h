@@ -18,6 +18,10 @@ class Node {
     const std::string &name() const { return name_; }
     const Node *next() const { return next_; }
 
+    Node *next_mut() { return next_; }
+
+    void set_next(Node *node) { next_ = node; }
+
   private:
     int id_;
     std::string name_;
@@ -30,19 +34,42 @@ class ConsistentHash {
 
     /// Computes the hash of the input string
     /// as a consistent hash.
-    const std::string &hash(const std::string &str) const {
-        int input_hash = hash::hash(str);
+    /// The `input_id` should be hashed key via hash::hash().
+    const std::string &hash(const int input_id) const {
         for (const Node *node = head_; node; node = node->next()) {
-            if (input_hash <= node->id()) { return node->name(); }
+            if (input_id <= node->id()) { return node->name(); }
         }
         return head_->name();
     }
 
     /// Adds a node to the consistent hash ring.
-    void add_node(int id, const std ::string &name) {
-        Node *new_node = new Node(id, name);
-        for (const Node *node = head_; node; node = node->next()) {
-            if (id > node->id()) { return; } // TODO: Implement this.
+    /// The requirement 0 <= id < hash::kHashSize should be satisfied.
+    void add_node(int id, const std::string &name) {
+        Node *new_node  = new Node(id, name);
+        Node *prev_node = nullptr;
+        for (Node *node = head_; node; node = node->next_mut()) {
+            if (id < node->id()) {
+                new_node->set_next(node);
+                prev_node->set_next(new_node);
+                return;
+            }
+            prev_node = node;
+        }
+        prev_node->set_next(new_node);
+        return;
+    }
+
+    /// Removes nodes whose name is `name`.
+    void remove_node_by_name(const std::string &name) {
+        Node *prev_node = nullptr;
+        for (Node *node = head_; node; node = node->next_mut()) {
+            if (node->name() == name) {
+                prev_node->set_next(node->next_mut());
+                delete node;
+                node = prev_node;
+            } else {
+                prev_node = node;
+            }
         }
     }
 
