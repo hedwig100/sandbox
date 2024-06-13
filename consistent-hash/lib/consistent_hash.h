@@ -31,6 +31,9 @@ class Node {
 class ConsistentHash {
   public:
     ConsistentHash() { head_ = new Node(0, "parent"); }
+    ConsistentHash(const std::string &default_node_name) {
+        head_ = new Node(0, default_node_name);
+    }
 
     /// Computes the hash of the input string
     /// as a consistent hash.
