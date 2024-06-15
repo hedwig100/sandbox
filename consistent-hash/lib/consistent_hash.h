@@ -47,6 +47,8 @@ class ConsistentHash {
 
     /// Adds a node to the consistent hash ring.
     /// The requirement 0 <= id < hash::kHashSize should be satisfied.
+    /// If there exists the node whose id is the same as `id`,
+    /// the new node is inserted right after the node.
     void add_node(int id, const std::string &name) {
         Node *new_node  = new Node(id, name);
         Node *prev_node = nullptr;

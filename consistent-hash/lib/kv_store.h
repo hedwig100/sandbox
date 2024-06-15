@@ -4,6 +4,7 @@
 #include <map>
 #include <random>
 #include <string>
+#include <utility>
 
 #include "consistent_hash.h"
 #include "hash.h"
@@ -26,12 +27,16 @@ class DistributedKeyValueStore {
 
     /// Returns the address the item exists and
     /// the value of item whose key is `key`.
+    /// If there does not exist the item whose key is `key`,
+    /// returns (random_address, 0).
     std::pair<std::string, int> select(const std::string &key) {
         const std::string address = consistent_hashing(key);
         return std::make_pair(address, address_key_values[address][key]);
     }
 
     /// Removes the item of key `key`.
+    /// If there does not exists the item whose key is `key`,
+    /// does nothing.
     void remove(const std::string &key) {
         address_key_values[consistent_hashing(key)].erase(key);
     }
@@ -41,12 +46,33 @@ class DistributedKeyValueStore {
         int node_id = random(hash::kHashSize);
         consistent_hash.add_node(node_id, address);
 
-        // (TODO): Move items to the address
-        address_key_values[]
+        // Re-hash necessary keys.
+        const std::string &original_node_address =
+            consistent_hash.hash(node_id + 1);
+        for (const auto &[key, value] :
+             address_key_values[original_node_address]) {
+            if (consistent_hashing(key) != original_node_address) {
+                address_key_values[address][key] = value;
+            }
+        }
+        for (const auto &[key, value] : address_key_values[address]) {
+            address_key_values[original_node_address].erase(key);
+        }
     }
 
     /// Removes the node whose address is `address`.
-    void remove_node(const std::string &address) {}
+    void remove_node(const std::string &address) {
+        consistent_hash.remove_node_by_name(address);
+        if (address_key_values[address].empty()) return;
+
+        // Re-hash necessary keys
+        const std::string &moved_node_address = consistent_hashing(
+            /*input=*/address_key_values[address].begin()->first);
+        for (const auto &[key, value] : address_key_values[address]) {
+            address_key_values[moved_node_address][key] = value;
+        }
+        address_key_values[address].clear();
+    }
 
   private:
     const std::string &consistent_hashing(const std::string &input) {
