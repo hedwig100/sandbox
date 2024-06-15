@@ -7,7 +7,13 @@ namespace hash {
 
 const int kHashSize = 100;
 
-int hash(std::string str) { return std::stoi(str) % kHashSize; }
+int hash(std::string str) {
+    int hash_value = 0;
+    for (const char &c : str) {
+        hash_value = (kHashSize * hash_value + (c - '0')) % kHashSize;
+    }
+    return hash_value;
+}
 
 } // namespace hash
 
