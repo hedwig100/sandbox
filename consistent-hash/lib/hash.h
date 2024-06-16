@@ -6,11 +6,12 @@
 namespace hash {
 
 const int kHashSize = 100;
+const int kCharSize = 256;
 
 int hash(std::string str) {
     int hash_value = 0;
     for (const char &c : str) {
-        hash_value = (kHashSize * hash_value + (c - '0')) % kHashSize;
+        hash_value = (kCharSize * hash_value + (c - '\0')) % kHashSize;
     }
     return hash_value;
 }
