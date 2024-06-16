@@ -1,4 +1,7 @@
-# C++ template
+# Consistent Hash
+
+This directory contains implementation of consistent hash and (simulated, not really distributed) distributed key-value store 
+using the hash.  
 
 ## Build
 ```
@@ -9,12 +12,12 @@ cmake --build build
 ## Run `main.cc`
 
 ```
-./do/src/main
+./build/src/main
 ```
 
-## Run `add_test.cc`
+## Run `consistent_hash_test.cc`
 
 ```
-./do/lib/add_test
+./build/lib/consistent_hash_test
 ```
 
