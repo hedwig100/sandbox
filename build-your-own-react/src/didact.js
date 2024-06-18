@@ -1,4 +1,4 @@
-const Didact = {
+export const Didact = {
     createElement,
     render,
 }
@@ -29,7 +29,7 @@ function createTextElement(text) {
 
 function render(element, container) {
     const dom = 
-      element.type == "TEXT_ELEMENT" 
+      element.type === "TEXT_ELEMENT" 
       ? document.createTextNode("") 
       : document.createElement(element.type)
     
@@ -47,14 +47,3 @@ function render(element, container) {
 
     container.appendChild(dom)
 }
-
-/**@jsx Didact.createElement */
-const element = (
-    <div id="foo">
-        <a>bar</a>
-        <b />
-    </div>
-)
-
-const container = document.getElementById("root")
-Didact.render(element, container)
