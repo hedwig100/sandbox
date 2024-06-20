@@ -122,6 +122,38 @@ func nodeLookupLE(node BNode, key []byte) uint16 {
 	return found
 }
 
+// Copies a KV pair into the `idx`.
+func nodeAppendKV(new BNode, idx uint16, ptr uint64, key []byte, val []byte) {
+	new.setPtr(idx, ptr)
+
+	// KVs
+	pos := new.kvPos(idx)
+	binary.LittleEndian.PutUint16(new[pos+0:], uint16(len(key)))
+	binary.LittleEndian.PutUint16(new[pos+2:], uint16(len(val)))
+	copy(new[pos+4:], key)
+	copy(new[pos+4+uint16(len(key)):], val)
+
+	// the offset of the next key
+	new.setOffset(idx+1, new.getOffset(idx)+4+uint16(len(key)+len(val)))
+}
+
+// Appends bytes of `old` whose index is `srcOld` and length is `n`
+// to `new` from `dstNew` index
+func nodeAppendRange(new BNode, old BNode, dstNew uint16, srcOld uint16, n uint16) {
+	for i := uint16(0); i < n; i++ {
+		nodeAppendKV(new, dstNew+i, old.getPtr(srcOld+i), old.getKey(srcOld+i), old.getVal(srcOld+i))
+	}
+}
+
+func leafInsert(new BNode, old BNode, idx uint16, key []byte, val []byte) {
+	new.setHeader(BNODE_LEAF, old.nkeys()+1)
+	nodeAppendRange(new, old, 0, 0, idx)
+
+	// NOTE: Why is the arguemnt `ptr` zero? Should it be a meaningful pointer?
+	nodeAppendKV(new, idx, 0, key, val)
+	nodeAppendRange(new, old, idx+1, idx, old.nkeys()-idx)
+}
+
 type BTree struct {
 	// pointer (a nonzero page number)
 	root uint64
@@ -135,4 +167,45 @@ type BTree struct {
 
 	// del deallocate a page
 	del func(uint64)
+}
+
+func nodeReplaceKidN(tree *BTree, new BNode, old BNode, idx uint16, kids ...BNode) {
+	inc := uint16(len(kids))
+	new.setHeader(BNODE_NODE, old.nkeys()+inc-1)
+	nodeAppendRange(new, old, 0, 0, idx)
+	for i, node := range kids {
+		// NOTE: The value is `nil`, because its B+tree and internal nodes don"t
+		// have values.
+		nodeAppendKV(new, idx+uint16(i), tree.new(node), node.getKey(0), nil)
+	}
+	nodeAppendRange(new, old, idx+inc, idx+1, old.nkeys()-(idx+1))
+}
+
+func nodeSplit2(left BNode, right BNode, old BNode) {
+
+}
+
+func nodeSplit3(old BNode) (uint16, [3]BNode) {
+	if old.nbytes() <= BTREE_PAGE_SIZE {
+		old = old[:BTREE_PAGE_SIZE]
+		return 1, [3]BNode{old}
+	}
+
+	left := BNode(make([]byte, 2*BTREE_PAGE_SIZE))
+	right := BNode(make([]byte, BTREE_PAGE_SIZE))
+	nodeSplit2(left, right, old)
+	if left.nbytes() <= BTREE_PAGE_SIZE {
+		left = left[:BTREE_PAGE_SIZE]
+		return 2, [3]BNode{left, right}
+	}
+
+	leftleft := BNode(make([]byte, BTREE_PAGE_SIZE))
+	middle := BNode(make([]byte, BTREE_PAGE_SIZE))
+	nodeSplit2(leftleft, middle, left)
+
+	if leftleft.nbytes() > BTREE_PAGE_SIZE {
+		os.Exit(1)
+	}
+
+	return 3, [3]BNode{leftleft, middle, right}
 }
