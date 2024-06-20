@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
 	"log"
 	"os"
@@ -50,6 +51,75 @@ func (node BNode) getPtr(idx uint16) uint64 {
 func (node BNode) setPtr(idx uint16, val uint64) {
 	pos := HEADER + 8*idx
 	binary.LittleEndian.PutUint64(node[pos:], val)
+}
+
+func offsetPos(node BNode, idx uint16) uint16 {
+	if idx == 0 || idx > node.nkeys() {
+		os.Exit(1)
+	}
+	return HEADER + 8*node.nkeys() + 2*(idx-1)
+}
+
+func (node BNode) getOffset(idx uint16) uint16 {
+	if idx == 0 {
+		return 0
+	}
+	return binary.LittleEndian.Uint16(node[offsetPos(node, idx):])
+}
+
+func (node BNode) setOffset(idx uint16, offset uint16) {
+	if idx == 0 {
+		os.Exit(1)
+	}
+	binary.LittleEndian.PutUint16(node[offsetPos(node, idx):], offset)
+}
+
+func (node BNode) kvPos(idx uint16) uint16 {
+	if idx > node.nkeys() {
+		os.Exit(1)
+	}
+	return HEADER + 8*node.nkeys() + 2*node.nkeys() + node.getOffset(idx)
+}
+
+func (node BNode) getKey(idx uint16) []byte {
+	if idx >= node.nkeys() {
+		os.Exit(1)
+	}
+	pos := node.kvPos(idx)
+	klen := binary.LittleEndian.Uint16(node[pos:])
+	return node[pos+4:][:klen]
+}
+
+func (node BNode) getVal(idx uint16) []byte {
+	if idx >= node.nkeys() {
+		os.Exit(1)
+	}
+	pos := node.kvPos(idx)
+	klen := binary.LittleEndian.Uint16((node[pos:]))
+	vlen := binary.LittleEndian.Uint16(node[pos+2:])
+	return node[pos+4+klen:][:vlen]
+}
+
+func (node BNode) nbytes() uint16 {
+	return node.kvPos(node.nkeys())
+}
+
+// Returns the first kid node whose range intersects the key
+// (kid[i] <= key)
+func nodeLookupLE(node BNode, key []byte) uint16 {
+	nkeys := node.nkeys()
+	found := uint16(0)
+
+	for i := uint16(1); i < nkeys; i++ {
+		cmp := bytes.Compare(node.getKey(i), key)
+		if cmp <= 0 {
+			found = i
+		}
+		if cmp >= 0 {
+			break
+		}
+	}
+	return found
 }
 
 type BTree struct {
