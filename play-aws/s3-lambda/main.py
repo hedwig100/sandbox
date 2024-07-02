@@ -1,26 +1,63 @@
 # This script can be used as a lambda function.
-
+from requests_toolbelt.multipart import decoder
 import json
 import boto3
 
-from http.server import BaseHTTPRequestHandler
-from io import BytesIO
+
+class S3Client:
+    def __init__(self, bucket_name: str) -> None:
+        self.bucket_name = bucket_name
+        self.s3 = boto3.client("s3")
+
+    def get(self, key: str):
+        s3_response = self.s3.get_object(Bucket=self.bucket_name, Key=key)
+        return s3_response["Body"]
+
+    def put(self, key: str, object: bytes):
+        return self.s3.put_object(Body=object, Bucket=self.bucket_name, Key=key)
 
 
-class HTTPRequest(BaseHTTPRequestHandler):
-    def __init__(self, request_text):
-        self.rfile = BytesIO(request_text)
-        self.raw_requestline = self.rfile.readline()
-        self.parse_request()
+client = S3Client()
 
 
-def lambda_handler(event, context):
+def parse_multipart(headers, body):
+    content_length = int(headers["Content-Length"])
+    multipart_decoder = decoder.MultipartDecoder(
+        body.read(content_length), headers["Content-Type"]
+    )
+    return multipart_decoder.parts
+
+
+def filename_from_multipart_header(multipart_header):
+    pass
+
+
+### Lambda function
+
+
+def lambda_upload(event, context):
     headers = event["headers"]
+    body = event["body"]
+    multiparts = parse_multipart(headers, body)
+    client.put(key, multiparts[0].content)
+    return {"statusCode": 200}
 
-    body = json.loads(event["body"])
-    return return_filename(body)
 
+def lambda_download(event, context):
+    """
+    body: {
+      "filename": "xxx.py"
+    }
+    """
+    body = json.load(event["body"])
+    filename = body["filename"]
 
-def return_filename(body):
-    return_value = {"filename": body["filename"]}
-    return {"statusCode": 200, "body": json.dumps(return_value)}
+    object = client.get(filename)
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/octet-stream",
+            "Content-Disposition": f"attachmentl; filename={filename}",
+        },
+        "body": object,
+    }
