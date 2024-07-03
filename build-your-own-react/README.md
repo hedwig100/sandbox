@@ -21,6 +21,15 @@ npm start
 - そこでDOMツリーの構築をいくつかの部分に分けて、その各部分が終わった後にブラウザがほかにやるべきことがあればそれができるようにする. 
 - そこで `requestIdelCallback` を使う. これは `setTimeout` と同様に使うが, `setTimeout` と異なる点はある時間があった後にcallbackが実行されるのではなく, メインスレッドがアイドル状態にあるときにcallbackが実行されることである.
 
+**Step IV: Fibers**
+- StepIIIで小さな単位にDOMツリーの構築を分解すると書いたが, それはfiber treeというものを使って行われる. 
+- fiber treeは木構造のデータ構造で
+    - 割り当てられた仕事を木のノード単位に分割し, 
+    - 次にやるべき仕事を決める
+　ためのデータ構造である. 調べたところこれは一般的な概念ではなく, React 特有の概念っぽいのでそれほど抽象的に理解する必要はないかも.
+- treeを明示的に持っていないが, 走査する部分が `performUnitOfWork` に実装されている. 
+- `render` はルートのノードを設定している. 
+
 ## References
 - https://pomb.us/build-your-own-react/
 - https://zenn.dev/akatsuki/articles/a2cbd26488fa151b828b
