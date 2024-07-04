@@ -34,6 +34,12 @@ npm start
 - Step IVまでの実装ではDOMツリーを毎回更新しているため, ユーザは完成途中のDOMを見ることになっていた. しかしそれは望ましくなくて、完成した最後のDOMツリーだけ見えるようにしたい.
 - そこでDOMノードの構築とDOMツリーの構築は別々に行う. `performUnitOfWork` はDOMノードの構築のみ行う. DOMツリーの構築はすべてのDOMノードを構築し終わった後, すなわち `nextUnitOfWork` がnullになった時に行う. 
 
+**Step VI: Reconciliation**
+- Step VまででDOMツリーを構築することはできたが, これをupdateしたり, 消したりすることをこのステップでできるようにする.
+- そのために各DOMノードに、直前に構築したDOMノードへの参照を持っておくようにする. これが新しく作ろうとしているDOMノードと一致する場合はレンダリングせず、一致しない場合のみ再レンダリングが走るようにする. 
+
+Tips: javascript で `&&` はすべての値が真値であれば, 最後のオペランドの値が返される. そうでない場合, 最も最初の偽値のオペランドを返す.
+
 ## References
 - https://pomb.us/build-your-own-react/
 - https://zenn.dev/akatsuki/articles/a2cbd26488fa151b828b
