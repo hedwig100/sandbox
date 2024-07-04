@@ -44,18 +44,37 @@ function createDom(fiber) {
     return dom
 }
 
+function commitRoot() {
+    commitWork(wipRoot.child)
+    wipRoot = null
+}
+
+function commitWork(fiber) {
+    if (!fiber) {
+        return
+    }
+    const domParent = fiber.parent.dom
+    domParent.appendChild(fiber.dom)
+    commitWork(fiber.child)
+    commitWork(fiber.sibling)
+}
+
 function render(element, container) {
-    nextUnitOfWork = {
+    wipRoot = {
         dom: container,
         props: {
             children: [element],
         },
     }
+    nextUnitOfWork = wipRoot
 }
 
 // For concurrent execution,
 
 let nextUnitOfWork = null
+
+// The root of the DOM tree working in progress
+let wipRoot = null
 
 function workLoop(deadline) {
     let shouldYield = false
@@ -63,6 +82,11 @@ function workLoop(deadline) {
         nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
         shouldYield = deadline.timeRemaining() < 1
     }
+
+    if (!nextUnitOfWork && wipRoot) {
+        commitRoot()
+    }
+
     requestIdleCallback(workLoop)
 }
 
@@ -71,12 +95,6 @@ function performUnitOfWork(fiber) {
     // Construct DOM of the fiber node.
     if (!fiber.dom) {
         fiber.dom = createDom(fiber)
-    }
-
-    // If the fiber node has a parent, append itself to the 
-    // parent.
-    if (fiber.parent) {
-        fiber.parent.dom.appendChild(fiber.dom)
     }
 
     // If the fiber node has children, create fiber node 
