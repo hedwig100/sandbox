@@ -51,6 +51,11 @@ function App(props) {
 - よってFunction componentかそうでないかによって処理を分ける必要がある. 
 - またDOMノードを持っていないfiberがあるため, 子や親に行く処理があるときにDOMノードがある場合はスキップするなどの処理を行う必要がある. 
 
+**Step VIII: Hooks**
+- Hooksを追加する. 
+- `useState(initial)` をここでは追加する. `useState(initial)` はまず昔のfiberに対応するhookがあるときはそのstateをコピーする. そうでない場合は新規にhookが作成されているので `initial` で初期化する. 
+- また更新用の関数はhookがもつqueueに更新用の関数への引数をpushしておき, `wipRoot` を設定しておくことで行う. 
+
 ## References
 - https://pomb.us/build-your-own-react/
 - https://zenn.dev/akatsuki/articles/a2cbd26488fa151b828b
