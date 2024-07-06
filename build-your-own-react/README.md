@@ -40,6 +40,17 @@ npm start
 
 Tips: javascript で `&&` はすべての値が真値であれば, 最後のオペランドの値が返される. そうでない場合, 最も最初の偽値のオペランドを返す.
 
+**Step VII: Function Components**
+- Function componentsを追加する. Function componentsは以下のような使い方ができるもの. 
+```js
+function App(props) {
+    return <h1>Hi {props.name}</h1>
+}
+```
+- Function componentはDOMノードを持たないfiberとして機能する. つまり, 構造を示しているだけで実際に描画される, あるDOMノードとの対応があるわけではない. 
+- よってFunction componentかそうでないかによって処理を分ける必要がある. 
+- またDOMノードを持っていないfiberがあるため, 子や親に行く処理があるときにDOMノードがある場合はスキップするなどの処理を行う必要がある. 
+
 ## References
 - https://pomb.us/build-your-own-react/
 - https://zenn.dev/akatsuki/articles/a2cbd26488fa151b828b

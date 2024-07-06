@@ -89,7 +89,13 @@ function commitWork(fiber) {
     if (!fiber) {
         return
     }
-    const domParent = fiber.parent.dom
+
+    // Find parent with a DOM node (functional components don't have DOM nodes)
+    let domParentFiber = fiber.parent
+    while (!domParentFiber.dom) {
+        domParentFiber = domParentFiber.parent
+    }
+    const domParent = domParentFiber.dom
 
     if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
         domParent.appendChild(fiber.dom)
@@ -100,11 +106,21 @@ function commitWork(fiber) {
             fiber.props,
         )
     } else if (fiber.effectTag === "DELETION") {
-        domParent.removeChild(fiber.dom)
+        commitDeletion(fiber, domParent)
     } 
 
     commitWork(fiber.child)
     commitWork(fiber.sibling)
+}
+
+// Find a descendant of a fiber with a DOM node
+// , which is a child of a DOM node of `domParent`
+function commitDeletion(fiber, domParent) {
+    if (fiber.dom) {
+        domParent.removeChild(fiber.dom)
+    } else {
+        commitDeletion(fiber.child, domParent)
+    }
 }
 
 function render(element, container) {
@@ -150,15 +166,12 @@ requestIdleCallback(workLoop)
 
 function performUnitOfWork(fiber) {
 
-    // Construct DOM of the fiber node.
-    if (!fiber.dom) {
-        fiber.dom = createDom(fiber)
+    const isFunctionComponent = fiber.type instanceof Function
+    if (isFunctionComponent) {
+        updateFunctionComponent(fiber)
+    } else {
+        updateHostComponent(fiber)
     }
-
-    // If the fiber node has children, reconcile fiber node 
-    // corresponding to children.
-    const elements = fiber.props.children
-    reconcileChildren(fiber, elements)
 
     // Returns nextUnitOfWork
     if (fiber.child) {
@@ -171,6 +184,23 @@ function performUnitOfWork(fiber) {
         }
         nextFiber = nextFiber.parent
     }
+}
+
+function updateFunctionComponent(fiber) {
+    const children = [fiber.type(fiber.props)]
+    reconcileChildren(fiber, children)
+}
+
+function updateHostComponent(fiber) {
+    // Construct DOM of the fiber node.
+    if (!fiber.dom) {
+        fiber.dom = createDom(fiber)
+    }
+
+    // If the fiber node has children, reconcile fiber node 
+    // corresponding to children.
+    const elements = fiber.props.children
+    reconcileChildren(fiber, elements)
 }
 
 function reconcileChildren(wipFiber, elements) {
