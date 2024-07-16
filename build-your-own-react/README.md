@@ -1,9 +1,63 @@
 # Build-your-own-react
 
+Reference: https://pomb.us/build-your-own-react/
+
+## Run
 ```
 export NODE_OPTIONS=--openssl-legacy-provider // To avoid error
 npm start
 ```
+
+## Architecture
+
+### Data structure
+- `Element`
+    - React element corresponding to DOM. This class works as an interface to users
+    - `type (string)` : HTML DOM type e.g. `h1`, `TEXT_ELEMENT`
+    - `props (json)`: properties of DOM element
+    - `children (Element[])`: children as a DOM element which is a list of `Element`
+
+- `DOM`
+    - a data structure inside html
+
+- `Fiber`
+    - a node of virtual DOM which Didact holds
+    - `type (string)`: HTML DOM type e.g. `h1`, `TEXT_ELEMENT`
+    - `child (Fiber)`: a reference to child fiber
+    - `sibling (Fiber)`: a reference to next sibling
+    - `parent (Fiber)`: a reference to parent node
+    - `effectTag (string)`: specify how to process the corresponding DOM node when updating the DOM tree e.g. `REPLACE`, `UPDATE`, `DELETION`
+    - `dom (DOM)`: the corresponding DOM element
+    - `alternate (Fiber)`: a reference to the old fiber. This is used for detecting the change of virtual DOM tree so that we can avoid unnecesary re-rendering
+    - `props (json)`: properties of DOM element
+    - `hooks (Hook[])`: a reference to hooks with this fiber
+
+- `Hook`
+    - having the state of the hook, and functions that will be appiled to the state.
+    - `state (any)`: a current state of the hook
+    - `queue (Function[])`: functions that will be applied to the variables corresponding to the hook
+
+### Global variables
+- `wipRoot (Fiber)`: currently processed root of the virtual DOM tree
+- `currentRoot (Fiber)`: current root of the virtal DOM tree
+- `wipFIber (Fiber)`: currently processed fiber
+- `nextUnitOfWork (Fiber)`: a fiber which should be processed next
+- `deletions (Fiber[])`: fibers that should be removed in the next commit
+- `hookIndex (integer)`: the number of hooks in `wipFiber`.
+
+### Functions
+- `createElement(type, props, ...children)`: returns an Element having the `type, props, children`
+- `render(element, container)`: set the given element to `wipRoot`, and `nextUnitOfWork`
+- `useState(initial)`: this function is used in a component. `wipFiber` 
+in this function points to the component. This function creates `Hook`
+and add it to `wipFiber.hooks`. Moreover, this function can be called 
+more than twice (while re-rendering). In this case, retrieve the old hook from `wipFiber.alternate.hooks[hookIndex]` and update the state.
+The `setState` function which `useState` returns adds the argument (function) to `hook.queeu` and set `currentRoot` to `wipRoot` and `nextUnitOfWork` (invokes re-rendering).
+- `workLoop`
+    - this function runs always when CPU is idle. When there is a `nextUnifOfWork`, execute `performUnitOfWork(nextUnitOfWork)`. 
+    - When there is no `nextUnitOfWork` and there is `wipRoot`, execute `commitRoot()`.
+    - `performUnitOfWork()` updates the fiber by comparing the current fiber and old fiber. This update varies for `FunctionComponent` (without DOM node) and normal components (having DOM node). 
+    - `commitRoot()` commits the `wipRoot`. Until this function is called, the update is only executed on `Fiber` (in other words, the update is temporarily on virtual DOM tree). This prevents users see the DOM node under change.
 
 ## MEMO
 
