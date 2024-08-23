@@ -25,3 +25,11 @@ cargo run
   sudo apt-get install qemu-system qemu-system-common qemu-utils
   ```
 - qemuで動いた! QEMU上でより簡単に走らせるためにbootimage runnerコマンドを使うとできる. これをCargoのrunner設定を用いることで簡単にできる. つまりただ `cargo run` するだけでQEMUの起動までできる.
+
+### VGAテキストモード
+
+- VGAテキストバッファ
+    - 25行80列 の行列で各要素はasciiコードポイントと色であらわされる.
+- WriterはVGAバッファにメモリマップしてそこに書き込むことで画面に表示する
+- コンパイラの最適化により書き込みが無効にならないよう, Volatileクレートを用いる. 
+- `write!()` マクロ実行できていてすごい.  
