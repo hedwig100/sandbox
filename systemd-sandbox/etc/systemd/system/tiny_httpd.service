@@ -1,0 +1,11 @@
+[Unit]
+Description=Tiny HTTPD
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/shota/repos/github.com/hedwig100/sandbox/systemd-sandbox
+ExecStart=/home/shota/.local/share/poetry/bin/poetry run python usr/bin/tiny_httpd.py
+
+[Install]
+WantedBy=multi-user.target

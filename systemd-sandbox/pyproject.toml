@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "systemd-sandbox"
+version = "0.1.0"
+description = ""
+authors = ["hedwig100 <shota.in26@gmail.com>"]
+readme = "README.md"
+packages = [{include = "systemd_sandbox"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
