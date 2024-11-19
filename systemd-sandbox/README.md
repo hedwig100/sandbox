@@ -13,3 +13,5 @@ sudo systemctl status tiny_httpd.service
 
 - asdfでインストールしたpythonのパスを指定すると実行できない.
 - 理想的にはpoetryとかでインストールしたモジュールを利用したものも動かせるようにしたい.
+- systemdのファイルたちは環境変数がない状態で実行されるため, 相対パスで実行ファイルを指定したいとき(e.g. poetry, pythonなど)はPath環境変数をEnvironmentalFileなどで与えてやる必要がある.
+- 
