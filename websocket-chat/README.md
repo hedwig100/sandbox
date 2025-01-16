@@ -6,6 +6,9 @@ npm install
 npm run server
 ```
 
+VscodeのLiveServerという拡張機能でindex.htmlのサーバを立てる(これでアクセスしないとCORSエラーで多分動かない).
+http://localhost:5500にアクセスする.
+
 ## メモ
 - npmでプロジェクト作る. socket.ioとnodemonをインストール
 - server.jsがサーバ, script.js, index.htmlがクライアント
