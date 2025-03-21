@@ -35,6 +35,7 @@ gcc -o lex.o lex.yy.c
 で動いた。
 
 - lex.lをfirst-lexディレクトリに移動。
+- pascalディレクトリにpascalライクな言語の字句解析器のみ実装、Makeも使ってみた。
 
 ## 参考
 
