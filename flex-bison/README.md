@@ -34,6 +34,8 @@ gcc -o lex.o lex.yy.c
 ```
 で動いた。
 
+- lex.lをfirst-lexディレクトリに移動。
+
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)
