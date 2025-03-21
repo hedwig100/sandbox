@@ -37,3 +37,6 @@ gcc -o lex.o lex.yy.c
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)
+[公式レポジトリのサンプル](https://github.com/westes/flex/tree/master/examples)
+[公式ドキュメントのSimple Example](https://westes.github.io/flex/manual/Simple-Examples.html#Simple-Examples)
+    - 説明が少なすぎる、どうやってコンパイルするとか書いてない。
