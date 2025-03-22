@@ -37,6 +37,26 @@ gcc -o lex.o lex.yy.c
 - lex.lをfirst-lexディレクトリに移動。
 - pascalディレクトリにpascalライクな言語の字句解析器のみ実装、Makeも使ってみた。
 
+### Bisonインストール
+```sh
+sudo wget -P /usr/local/src https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.gz
+cd /usr/local/src
+sudo tar xzf bison-3.8.2.tar.gz
+sudo ./configure --prefix=/usr/local/bin
+sudo make
+sudo make install
+bison --version
+```
+
+Bisonとflexをつかってbasic-arithをつくる。
+無理そうなのでまずはfirst-bisonで適当に触ってみる。
+
+```
+cd first-bison
+bison rpcalc.y
+gcc -o rpcalc.o rpcalc.tab.c -lm
+```
+
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)
