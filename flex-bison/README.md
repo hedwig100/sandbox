@@ -63,6 +63,8 @@ gcc -o rpcalc.o rpcalc.tab.c -lm
 - %left, %rightは演算が右結合か、左結合かということを意味する。つまり a + b + c が (a + b) + cなのか a + (b + c) なのかということ。
 - %prec NEG でNEGと優先順序が同じであることを示す。
 
+- `error` は予約されていて、エラーになったら発火する。
+
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)
