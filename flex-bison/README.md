@@ -65,6 +65,11 @@ gcc -o rpcalc.o rpcalc.tab.c -lm
 
 - `error` は予約されていて、エラーになったら発火する。
 
+### Multi function calculator
+
+- `api.value.type union` で union 型を YYSTYPE として使える(Semantic valueを持つ)。
+- `%nterm` は non-terminal symbol を union の中の一つとして使える。
+
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)
