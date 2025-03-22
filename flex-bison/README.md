@@ -57,9 +57,17 @@ bison rpcalc.y
 gcc -o rpcalc.o rpcalc.tab.c -lm
 ```
 
+###　Infix
+
+- 演算子の優先順序は宣言の下の方にある方が優先。
+- %left, %rightは演算が右結合か、左結合かということを意味する。つまり a + b + c が (a + b) + cなのか a + (b + c) なのかということ。
+- %prec NEG でNEGと優先順序が同じであることを示す。
+
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)
-[公式レポジトリのサンプル](https://github.com/westes/flex/tree/master/examples)
-[公式ドキュメントのSimple Example](https://westes.github.io/flex/manual/Simple-Examples.html#Simple-Examples)
+[Flex公式レポジトリのサンプル](https://github.com/westes/flex/tree/master/examples)
+[Flex公式ドキュメントのSimple Example](https://westes.github.io/flex/manual/Simple-Examples.html#Simple-Examples)
     - 説明が少なすぎる、どうやってコンパイルするとか書いてない。
+[Bison公式ドキュメント](https://www.gnu.org/software/bison/manual/bison.html#Concepts)
+    - ここからやってExampleくらいまでやるといい。
