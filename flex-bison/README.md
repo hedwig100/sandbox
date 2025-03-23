@@ -79,6 +79,17 @@ bison parser.yy -o parser.cc
 g++ -std=c++14 parser.cc -o parser.o
 ```
 
+### Bison and flex with C++
+
+[Complex example](https://www.gnu.org/software/bison/manual/bison.html#A-Complete-C_002b_002b-Example)を完全にパクッて、
+そこから望みの方向へ少しずつ、変更していくことにした。bisonをインストールしたディレクトリの`examples/c++/calc++`にある。
+
+やりたいこと
+- 外から使うクラスにはネームスペースをつける。
+- できるだけわからないところをつぶす。
+- C, C++の実装はできるだけlexer.l, parser.yyの外で行えるようにする。
+- std::istreamを入力として、構文木を返却できるようにする。
+
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)

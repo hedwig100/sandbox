@@ -29,11 +29,13 @@
 
 %code requires {
   # include <string>
-  class driver;
+  namespace sql {
+  class Parser;
+  }
 }
 
 // The parsing context.
-%param { driver& drv }
+%param { sql::Parser& drv }
 
 %locations
 
