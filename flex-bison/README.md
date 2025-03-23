@@ -70,6 +70,15 @@ gcc -o rpcalc.o rpcalc.tab.c -lm
 - `api.value.type union` で union 型を YYSTYPE として使える(Semantic valueを持つ)。
 - `%nterm` は non-terminal symbol を union の中の一つとして使える。
 
+### Bison C++
+
+- bisonをC++から使えるようにする。
+```
+cd cpp-bison
+bison parser.yy -o parser.cc
+g++ -std=c++14 parser.cc -o parser.o
+```
+
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)
