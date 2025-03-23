@@ -19,6 +19,7 @@ ADD_FLEX_BISON_DEPENDENCY(Lexer Parser)
 
 add_library(driver
     driver.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/parser.cc
 )
 target_include_directories(driver
     PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
