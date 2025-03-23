@@ -1,36 +1,39 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.10)
+project(SQLParser)
 
-project(Calc VERSION 1.0 LANGUAGES CPP)
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
 
-find_package(FLEX 2.6 REQUIRED)
-find_package(BISON 3.0 REQUIRED)
+BISON_TARGET(Parser
+    parser.yy
+    ${CMAKE_CURRENT_BINARY_DIR}/parser.cc
+    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parser.h
+)
 
-flex_target(my_lexer
+FLEX_TARGET(Lexer
     lexer.l
-    lexer.yy.cc
-    DEFINES_FILE lexer.yy.h
+    ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 )
 
-bison_target(my_parser
-    parser.y
-    parser.tab.cc
-    DEFINES_FILE parser.tab.h
+ADD_FLEX_BISON_DEPENDENCY(Lexer Parser)
+
+add_library(driver
+    driver.cc
+)
+target_include_directories(driver
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_flex_bison_dependency(my_lexer my_parser)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-add_library(utils
-    utils.cc
-)
-
-add_executable(calc 
+add_executable(sql_parser
     main.cc
-    ${FLEX_my_lexer_OUTPUTS}
-    ${BISON_my_parser_OUTPUTS}
+    ${CMAKE_CURRENT_BINARY_DIR}/parser.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 )
-target_link_libraries(calc
-    ${FLEX_LIBRARIES}
-    ${BISON_LIBRARIES}
+target_include_directories(sql_parser
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(sql_parser
+    driver
 )
