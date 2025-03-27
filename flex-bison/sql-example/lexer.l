@@ -1,6 +1,7 @@
 
 %top {
 
+#include "sql.h"
 #include "parser.h"
 #include <stdio.h>
 
@@ -44,7 +45,7 @@ FROM {return TOKEN_FROM;}
 
 %%
 
-void yyerror(yyscan_t scanner, char const *msg) {
+void yyerror(sql::ParseResult* result, yyscan_t scanner, char const *msg) {
     fprintf(stderr, "%s\n", msg);
 }
 

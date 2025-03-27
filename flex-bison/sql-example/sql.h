@@ -8,5 +8,10 @@ public:
     SelectStatement() {}
 };
 
+class ParseResult {
+public:
+    ParseResult() {}
+};
+
 }
 #endif // _SQL_H_

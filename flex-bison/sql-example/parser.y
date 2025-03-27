@@ -15,6 +15,7 @@ typedef void* yyscan_t;
 %lex-param   { yyscan_t scanner }
 
 // Define additional parameters for yyparse
+%parse-param { sql::ParseResult* result }
 %parse-param { yyscan_t scanner }
 
 /************
@@ -51,7 +52,7 @@ typedef void* yyscan_t;
 %code provides {
 /* Flex-related declaration */
 extern int yylex(YYSTYPE *, yyscan_t);
-extern void yyerror(yyscan_t, char const *);
+extern void yyerror(sql::ParseResult *, yyscan_t, char const *);
 }
 
 /**********

@@ -68,6 +68,7 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "*.y": "cpp"
+        "*.y": "cpp",
+        "*.ipp": "cpp"
     }
 }
