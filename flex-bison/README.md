@@ -90,6 +90,14 @@ g++ -std=c++14 parser.cc -o parser.o
 - C, C++の実装はできるだけlexer.l, parser.yyの外で行えるようにする。
 - std::istreamを入力として、構文木を返却できるようにする。
 
+## SQL example
+C++で書くのはあきらめたのですべてをC言語で書く。
+
+bison
+- %tokenのはflexで定義された何か? それともbison側で定義している？
+- 
+
+flex
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)
