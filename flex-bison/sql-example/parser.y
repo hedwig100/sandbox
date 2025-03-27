@@ -1,11 +1,15 @@
-%{
+%code requires {
 
 #include "sql.h"
 #include <string>
+#include <stdio.h>
 
-%}
+extern int yylex(void);
+void yyerror(char const *msg) {
+    fprintf(stderr, "%s\n", msg);
+}
 
-%define api.token.prefix {TOKEN_}
+}
 
 /************
 ** Semantic values (https://www.gnu.org/software/bison/manual/html_node/Union-Decl.html)
@@ -19,9 +23,15 @@
 }
 
 
+// Destructor (https://www.gnu.org/software/bison/manual/html_node/Destructor-Decl.html)
+%destructor {} <ival> <identifier>
+%destructor { delete($$); } <*>
+
+
 /************
-** Token types and 
+** Semantic Value type and the corresponding token or nterm
 *************/
+%define api.token.prefix {TOKEN_}
 
 /* Terminal types (https://www.gnu.org/software/bison/manual/html_node/Token-Decl.html) */
 %token <ival> INTEGER_VAL
