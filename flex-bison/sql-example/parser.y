@@ -5,9 +5,17 @@
 #include <stdio.h>
 #include <iostream>
 
+/* Flex-related declaration */
+typedef void* yyscan_t;
 }
 
 %define api.pure full
+
+// Define additional parameters for yylex (http://www.gnu.org/software/bison/manual/html_node/Pure-Calling.html)
+%lex-param   { yyscan_t scanner }
+
+// Define additional parameters for yyparse
+%parse-param { yyscan_t scanner }
 
 /************
 ** Semantic values (https://www.gnu.org/software/bison/manual/html_node/Union-Decl.html)
@@ -40,10 +48,11 @@
 /* Non-terminal symbols (https://www.gnu.org/software/bison/manual/html_node/Type-Decl.html) */
 %type <select_statement> select_statement
 
-%{
-extern int yylex(YYSTYPE *);
-extern void yyerror(char const *);
-%}
+%code provides {
+/* Flex-related declaration */
+extern int yylex(YYSTYPE *, yyscan_t);
+extern void yyerror(yyscan_t, char const *);
+}
 
 /**********
 ** Grammer Definitions

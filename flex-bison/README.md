@@ -106,7 +106,11 @@ bison
 - だが%unionでせいせいしたSemanticValueの型にコンストラクタとかがないせいでC++でコンパイルすると使えない。デストラクタだけは定義できるけど、代入演算子とかが定義できない。それでコンパイルが通らない。
 - なんかわからんが%unionの中のstd::stringを*std::stringにするとコンパイルが通った。
 
-flex
+- あとflexをreentrantにしたいのと入力をcinではなくてFILE*として与えたい。
+- reentrantはできた。
+    - reentrantにして適当にやる。yyscanner_tを宣言したりするといい。
+    - コードに書く位置が重要なのマジでやめてほしい。
+
 ## 参考
 
 [FlexとBisonで実用的なパーサーを作る](https://zenn.dev/arark/articles/02e4764b851868)

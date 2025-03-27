@@ -11,6 +11,7 @@
 *****************/
 
 %option noyywrap
+%option reentrant
 %option bison-bridge
 
 /****************
@@ -43,7 +44,7 @@ FROM {return TOKEN_FROM;}
 
 %%
 
-void yyerror(char const *msg) {
+void yyerror(yyscan_t scanner, char const *msg) {
     fprintf(stderr, "%s\n", msg);
 }
 
