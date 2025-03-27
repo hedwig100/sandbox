@@ -1,16 +1,17 @@
 
-%{
+%top {
 
 #include "parser.h"
 #include <stdio.h>
 
-%}
+}
 
 /****************
 ** Options
 *****************/
 
 %option noyywrap
+%option bison-bridge
 
 /****************
 ** Declarations
@@ -21,8 +22,12 @@ ID [_a-zA-Z][_a-zA-Z0-9]*
 /****************
 ** Rules
 *****************/
+%%
 
 [ \t\n]+
+
+SELECT {return TOKEN_SELECT;}
+FROM {return TOKEN_FROM;}
 
 [+,;] { return yytext[0]; }
 
@@ -36,9 +41,10 @@ ID [_a-zA-Z][_a-zA-Z0-9]*
     return TOKEN_IDENTIFIER;
 }
 
-/* SQL keywords */
-SELECT TOKEN_SELECT
-FROM TOKEN_FROM
+%%
 
+void yyerror(char const *msg) {
+    fprintf(stderr, "%s\n", msg);
+}
 
 

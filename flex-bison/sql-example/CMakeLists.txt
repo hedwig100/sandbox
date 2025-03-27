@@ -13,6 +13,7 @@ BISON_TARGET(Parser
 FLEX_TARGET(Lexer
     lexer.l
     ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
+    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/lexer.h
 )
 
 ADD_FLEX_BISON_DEPENDENCY(Lexer Parser)

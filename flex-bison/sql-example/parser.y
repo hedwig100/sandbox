@@ -3,13 +3,11 @@
 #include "sql.h"
 #include <string>
 #include <stdio.h>
-
-extern int yylex(void);
-void yyerror(char const *msg) {
-    fprintf(stderr, "%s\n", msg);
-}
+#include <iostream>
 
 }
+
+%define api.pure full
 
 /************
 ** Semantic values (https://www.gnu.org/software/bison/manual/html_node/Union-Decl.html)
@@ -17,14 +15,14 @@ void yyerror(char const *msg) {
 
 %union {
     int ival;
-    std::string identifier;
+    char *identifier;
 
     sql::SelectStatement *select_statement;
 }
 
 
 // Destructor (https://www.gnu.org/software/bison/manual/html_node/Destructor-Decl.html)
-%destructor {} <ival> <identifier>
+%destructor {} <ival>
 %destructor { delete($$); } <*>
 
 
@@ -39,9 +37,13 @@ void yyerror(char const *msg) {
 
 %token SELECT FROM
 
-/* Non-terminal symbols (https://www.gnu.org/software/bison/manual/html_node/Type-Decl.html)
+/* Non-terminal symbols (https://www.gnu.org/software/bison/manual/html_node/Type-Decl.html) */
 %type <select_statement> select_statement
 
+%{
+extern int yylex(YYSTYPE *);
+extern void yyerror(char const *);
+%}
 
 /**********
 ** Grammer Definitions
@@ -53,15 +55,16 @@ input
     ;
 
 select_statement
-    : SELECT column FROM table ';'
+    : SELECT column FROM table ';' { std::cerr << "SELECT!!\n"; }
     ;
 
 column
-    : IDENTIFIER
+    : INTEGER_VAL { std::cerr << "integer!!\n"; }
+    | IDENTIFIER { std::cerr << "ident!!\n"; }
     ;
 
 table
-    : IDENTIFIER
+    : IDENTIFIER { std::cerr << "ident!!\n"; }
     ;
 
 %%

@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "lexer.h"
+#include <iostream>
 
 int main() {
   int result = yyparse();
