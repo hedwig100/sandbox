@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-const {productStore, addUser, getUser} = require('./store');
+const {productStore, addUser, getUser, login, generateSession} = require('./store');
 
 app.get('/products', (req, res) => {
     res.json(Object.values(productStore));
@@ -34,21 +34,17 @@ const sessionMiddleware = (req, res, next) => {
     if (sessionId) {
         const user = Object.values(userStore).find(u => u.sessionId === sessionId);
         if (user) {
-            req.session.userId = user.id;
-            req.session.user = getUser(user.id);
+            if (req?.params?.id && req.params.id !== user.id) {
+                console.log('User ID mismatch in session middleware');
+                return res.status(403).send('Forbidden');
+            }
+            req.session = { userId: user.id };
         }
     }
     next();
 }
 
 app.get('/users/:id', sessionMiddleware, (req, res) => {
-    if (!req?.session?.userId) {
-        return res.status(401).send('Unauthorized');
-    }
-    if (req?.session?.userId !== req.params.id) {
-        return res.status(403).send('Forbidden');
-    }
-
     const user = getUser(req.params.id);
     if (user) {
         res.json(user);
@@ -65,6 +61,8 @@ app.post('/users', express.json(), (req, res) => {
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
+
+app.use(express.static('public'));
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);

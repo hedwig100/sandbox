@@ -42,7 +42,7 @@ const login = (id, password) => {
 const generateSession = (id) => {
     const sessionId = generateRandomString(16);
     updateUser(id, { sessionId });
-    return sessionId;
+    return sessionId
 }
 
-module.exports = { productStore, getUser, addUser, login };
+module.exports = { productStore, getUser, addUser, login, generateSession };
