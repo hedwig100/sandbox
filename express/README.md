@@ -11,3 +11,4 @@ npm install express
 - `require('a')` と `import` の違いは何？
 - `package.json` に書く
     - すると`npm`で動くようになる
+- `mjs, cjs`の違い
