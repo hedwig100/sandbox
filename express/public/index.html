@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Shop</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Simple Shop</h1>
+
+    <section id="products">
+        <h2>Products</h2>
+        <ul id="product-list"></ul>
+    </section>
+
+    <section id="product-details" style="display:none;">
+        <h2>Product Details</h2>
+        <pre id="product-info"></pre>
+    </section>
+
+    <section id="auth">
+        <h2>Register</h2>
+        <form id="register-form">
+            <input type="text" placeholder="User ID" name="id" required />
+            <input type="password" placeholder="Password" name="password" required />
+            <button type="submit">Register</button>
+        </form>
+
+        <h2>Login</h2>
+        <form id="login-form">
+            <input type="text" placeholder="User ID" name="id" required />
+            <input type="password" placeholder="Password" name="password" required />
+            <button type="submit">Login</button>
+        </form>
+    </section>
+
+    <section id="user-info" style="display:none;">
+        <h2>User Info</h2>
+        <pre id="user-data"></pre>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
