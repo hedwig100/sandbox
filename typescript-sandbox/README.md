@@ -65,4 +65,5 @@ npx tsc --init
     "start": "node ./dist/index.js",
 ```
 
+- とりあえずやったけどjest.config.jsの設定とかtsconfig.jsの中の設定内容とかがよくわからんかも。あとtsだとes5, es6の方がデフォルトのモジュールシステムとかいうのがわからん。
 
