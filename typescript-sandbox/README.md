@@ -58,4 +58,11 @@ npx tsc --init
   },
 ```
 
+- index.tsを追加
+- 以下をpackage.jsonに追加
+```js
+    "build": "npx tsc",
+    "start": "node ./dist/index.js",
+```
+
 
