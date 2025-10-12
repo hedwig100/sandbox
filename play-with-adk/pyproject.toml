@@ -8,6 +8,7 @@ packages = []
 
 [tool.poetry.dependencies]
 python = "^3.10"
+google-adk = "^1.16.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.6.1"

@@ -1,5 +1,5 @@
-# Python Template
+# Play with ADK
 
-```
-cp python-template <where-you-want-to-use-python>
-```
+- https://google.github.io/adk-docs/
+- https://google.github.io/adk-docs/get-started/quickstart/
+- https://google.github.io/adk-docs/tutorials/agent-team/
