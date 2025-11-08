@@ -1,6 +1,8 @@
-def main():
-    print("Hello, world!")
+from llama_index.llms.gemini import Gemini
 
-
-if __name__ == "__main__":
-    main()
+llm = Gemini(
+    model="models/gemini-2.5-flash",
+    # api_key="some key",  # uses GOOGLE_API_KEY env var by default
+)
+resp = llm.complete("こんにちは")
+print(resp)
