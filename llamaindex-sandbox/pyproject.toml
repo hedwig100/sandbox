@@ -1,18 +1,11 @@
-[tool.poetry]
-name = "python-template"
+[project]
+name = "llamaindex-sandbox"
 version = "0.1.0"
-description = ""
-authors = [""]
+description = "Add your description here"
 readme = "README.md"
-packages = []
-
-[tool.poetry.dependencies]
-python = "^3.10"
-
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.6.1"
-black = "^23.10.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.10"
+dependencies = [
+    "llama-index>=0.14.7",
+    "llama-index-embeddings-gemini>=0.4.1",
+    "llama-index-llms-gemini>=0.6.1",
+]
