@@ -1,8 +1,9 @@
-from llama_index.llms.gemini import Gemini
+import setting
 
-llm = Gemini(
-    model="models/gemini-2.5-flash",
-    # api_key="some key",  # uses GOOGLE_API_KEY env var by default
-)
-resp = llm.complete("こんにちは")
-print(resp)
+from llama_index.core import SimpleDirectoryReader
+from llama_index.core import VectorStoreIndex
+
+documents = SimpleDirectoryReader("data").load_data()
+index = VectorStoreIndex.from_documents(documents)
+query_engine = index.as_query_engine()
+print(query_engine.query("hedwigの好きな色は？"))
