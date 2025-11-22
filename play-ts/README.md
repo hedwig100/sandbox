@@ -11,7 +11,7 @@ node main.js
 
 - DONE: tsを普通に使ってみる(型付け、トランスパイル、パッケージ追加など) 
 - ts + jestを試す
-- ts + prettier + eslint を試す
+- DONE: ts + prettier + eslint を試す
 - ts + express を試す
 - ts + react + viteを試す
 - tsでBE,FEをどっちも同じProjectで作る
