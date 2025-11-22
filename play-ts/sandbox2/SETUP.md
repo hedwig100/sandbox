@@ -23,3 +23,8 @@ npm run start
 - `@` つかってimportするなら `tsup` が必要（FEとかだとViteとかを使うのが普通かも）
 - `process.env` とか使うならnodeの型定義をインストールする必要がある
     - `npm install --save-dev @types/node`
+- eslint, prettier:
+    - `npm install -D eslint prettier`
+    - `npm install -D @typescript-eslint/parser @typescript-eslint/eslint-plugin`
+    - `npm install -D eslint-config-prettier eslint-plugin-prettier`
+    - `npx eslint --init`: config生成
