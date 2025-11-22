@@ -9,3 +9,8 @@
     - GCP Vertex AIでgemini api keyを発行する
     - 上のではAPIの種類がちがくてできないので[Google AI Studio](https://aistudio.google.com/api-keys)の方でAPIキーを発行する、請求はGCPに紐づくっポイ。
     - うごいた
+
+でもGCPの認証で動かしたい！
+- `uv add llama-index-embeddings-google-genai`
+- で`from llama_index.embeddings.google_genai import GoogleGenAIEmbedding`して
+- `os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "true"`を設定すると動かせる
