@@ -21,4 +21,5 @@ npm run start
 ## 追加
 
 - `@` つかってimportするなら `tsup` が必要（FEとかだとViteとかを使うのが普通かも）
-- 
+- `process.env` とか使うならnodeの型定義をインストールする必要がある
+    - `npm install --save-dev @types/node`
