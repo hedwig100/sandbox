@@ -28,3 +28,4 @@ npm run start
     - `npm install -D @typescript-eslint/parser @typescript-eslint/eslint-plugin`
     - `npm install -D eslint-config-prettier eslint-plugin-prettier`
     - `npx eslint --init`: config生成
+    - prettierは設定ファイル`.prettierrc`を手動で作成
