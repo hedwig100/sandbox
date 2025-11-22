@@ -14,3 +14,4 @@
 - `uv add llama-index-embeddings-google-genai`
 - で`from llama_index.embeddings.google_genai import GoogleGenAIEmbedding`して
 - `os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "true"`を設定すると動かせる
+- retrieverとして使う例は `uv run vertex/retriever.py`
