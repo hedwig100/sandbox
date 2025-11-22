@@ -10,8 +10,8 @@ node main.js
 ## TODO
 
 - DONE: tsを普通に使ってみる(型付け、トランスパイル、パッケージ追加など) 
-- ts + jestを試す
 - DONE: ts + prettier + eslint を試す
+- DOING: ts + jest を試す
 - ts + express を試す
 - ts + react + viteを試す
 - tsでBE,FEをどっちも同じProjectで作る

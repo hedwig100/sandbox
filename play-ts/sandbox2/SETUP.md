@@ -29,3 +29,7 @@ npm run start
     - `npm install -D eslint-config-prettier eslint-plugin-prettier`
     - `npx eslint --init`: config生成
     - prettierは設定ファイル`.prettierrc`を手動で作成
+- jest:
+    - `npm install -D jest ts-jest @types/jest`
+    - `npm init jest`
+    - (`npm install -D ts-node`)
