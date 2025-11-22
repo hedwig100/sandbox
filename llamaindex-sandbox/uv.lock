@@ -1340,6 +1340,19 @@ wheels = [
 ]
 
 [[package]]
+name = "llama-index-embeddings-google-genai"
+version = "0.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "google-genai" },
+    { name = "llama-index-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/62/85/0f95fd3a9e99cddc4d1dec0f168842959f6e3aa0c2570144b452300c8162/llama_index_embeddings_google_genai-0.3.1.tar.gz", hash = "sha256:2514e276dae2a9d44801861bdd9b9a60f566ad861f5fd803e9cb7fba15c5b6d6", size = 5773, upload-time = "2025-09-08T20:16:28.007Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2c/8e/217c16fd0699410af986dddded765a5d3a6051823402aa24db61a737576b/llama_index_embeddings_google_genai-0.3.1-py3-none-any.whl", hash = "sha256:07d16431d33ac694325e2279417573a33f35c34d3d98284573b5d58caf3b3b27", size = 5533, upload-time = "2025-09-08T20:16:27.297Z" },
+]
+
+[[package]]
 name = "llama-index-embeddings-openai"
 version = "0.5.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1483,6 +1496,7 @@ dependencies = [
     { name = "google-auth" },
     { name = "llama-index" },
     { name = "llama-index-embeddings-gemini" },
+    { name = "llama-index-embeddings-google-genai" },
     { name = "llama-index-embeddings-vertex" },
     { name = "llama-index-llms-gemini" },
 ]
@@ -1492,6 +1506,7 @@ requires-dist = [
     { name = "google-auth", specifier = ">=2.43.0" },
     { name = "llama-index", specifier = ">=0.14.7" },
     { name = "llama-index-embeddings-gemini", specifier = ">=0.4.1" },
+    { name = "llama-index-embeddings-google-genai", specifier = ">=0.3.1" },
     { name = "llama-index-embeddings-vertex", specifier = ">=0.4.1" },
     { name = "llama-index-llms-gemini", specifier = ">=0.6.1" },
 ]

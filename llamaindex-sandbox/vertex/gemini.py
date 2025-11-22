@@ -1,7 +1,4 @@
-from llama_index.core import Settings
-from llama_index.embeddings.vertex import VertexTextEmbedding
-from llama_index.core import SimpleDirectoryReader
-from llama_index.core import VectorStoreIndex
+from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 import os 
 import google.auth 
 
@@ -12,7 +9,8 @@ credentials, project_id = google.auth.default()
 print(project_id, credentials)
 
 # 埋め込みモデルの準備
-embed_model = VertexTextEmbedding(
+# こっちだとGCPの権限ではできない、GOOGLEAISTUIDのほうでやるしかない
+embed_model = GoogleGenAIEmbedding(
     model_name="text-embedding-004",
     project=project_id,
     location="asia-northeast1",
