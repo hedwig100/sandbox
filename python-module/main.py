@@ -1,6 +1,4 @@
-def main():
-    print("Hello from python-module!")
-
+from a import child1
 
 if __name__ == "__main__":
-    main()
+    child1.main()
