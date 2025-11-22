@@ -1,5 +1,7 @@
 # README
 
+https://chatgpt.com/c/691ed2dd-4970-8324-a448-b1da17b8cec6
+
 ```
 tsc main.ts
 node main.js
