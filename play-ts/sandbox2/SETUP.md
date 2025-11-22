@@ -17,3 +17,8 @@ npx tsx --init
 npm run build
 npm run start
 ```
+
+## 追加
+
+- `@` つかってimportするなら `tsup` が必要（FEとかだとViteとかを使うのが普通かも）
+- 

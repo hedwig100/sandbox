@@ -1,4 +1,4 @@
-import { exportAdd } from "../lib.js";
+import { exportAdd } from "@/lib.js";
 
 const main = (): void => {
     console.log("This is route A");
