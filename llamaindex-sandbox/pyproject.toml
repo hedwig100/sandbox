@@ -1,0 +1,14 @@
+[project]
+name = "llamaindex-sandbox"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "google-auth>=2.43.0",
+    "llama-index>=0.14.7",
+    "llama-index-embeddings-gemini>=0.4.1",
+    "llama-index-embeddings-google-genai>=0.3.1",
+    "llama-index-embeddings-vertex>=0.4.1",
+    "llama-index-llms-gemini>=0.6.1",
+]
