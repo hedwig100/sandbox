@@ -2,6 +2,9 @@
 
 - Reaact + Vite
 - `npm create vite@latest`
+- `npm install @tailwindcss/vite`
+- これみてshadcn/uiをいれる
+  - [このページ](https://ui.shadcn.com/docs/installation/vite)
 
 
 ## React + TypeScript + Vite
