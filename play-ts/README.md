@@ -13,7 +13,7 @@ node main.js
 - DONE: ts + prettier + eslint を試す
 - DOING: ts + jest を試す
 - DONE: ts + express を試す
-- ts + react + viteを試す
+- DONE: ts + react + viteを試す
 - tsでBE,FEをどっちも同じProjectで作る
 
 ## 勉強
