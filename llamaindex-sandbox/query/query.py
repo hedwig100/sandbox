@@ -29,9 +29,9 @@ Google GenAIは、生成AIモデルを活用して、テキスト、画像、音
 ]
 
 class SentenceSplitterWithDocument(SentenceSplitter):
-    def get_nodes_from_documents(self, documents: list[Document], show_progress: bool = False,
+    def get_nodes_from_document(self, documents: list[Document], show_progress: bool = False,
         **kwargs: Any) -> list[Document]:
-        nodes = super().get_nodes_from_documents(documents, show_progress, **kwargs)
+        nodes = super().get_nodes_from_document(documents, show_progress, **kwargs)
         nodes.extend(documents)
         return nodes
 
@@ -44,17 +44,20 @@ parser = SentenceSplitterWithDocument(chunk_size=100, chunk_overlap=10)
 # nodes = parser.get_nodes_from_documents(documents)
 # for node in nodes:
 #     print(node)
-index = VectorStoreIndex.from_documents(
-    documents,
-    storage_context=storage_context,
-    transformations=[parser]
+index = VectorStoreIndex.from_vector_store(
+    vector_store=vector_store,
+    transformations=[parser],
+    store_nodes_override=True
 )
+refreshed = index.refresh_ref_docs(documents)
+print(f"Refreshed documents: {refreshed}")
 retriever = index.as_retriever()
 results = retriever.retrieve("AIエージェント開発したい")
 
 for res in results:
-    print(f"---\n{res.node.ref_doc_id}\n---")
-    print(f"---\n{res.get_text()}\n---")
-    print(f"---\n{res.get_content(metadata_mode=MetadataMode.EMBED)}\n---")
+    print(f"Doc ID: {res.node.ref_doc_id}")
+    print(f"Text: {res.get_text()}")
     x = vector_store.get_nodes(node_ids=[res.node.ref_doc_id])[0]
-    print(f"--- Original Document --- \n{x.get_text()}\n---")
+    print(f"Original Document: {x.get_text()}")
+
+print(chroma_collection.count())
