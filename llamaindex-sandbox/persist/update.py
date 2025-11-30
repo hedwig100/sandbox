@@ -18,6 +18,7 @@ storage_context = StorageContext.from_defaults(vector_store=vector_store,persist
 index = VectorStoreIndex(
     nodes=[],
     storage_context=storage_context,
+    store_nodes_override=True
 )
 
 print(index._docstore.get_all_ref_doc_info())
