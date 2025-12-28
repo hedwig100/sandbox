@@ -2,12 +2,12 @@ from datetime import datetime
 from uuid import uuid4
 from fastapi import APIRouter, HTTPException
 from src.domain.event import Event
-from src.repository.event_repository import EventRepository
+from src.infrastructure.event_repository_impl import EventRepositoryImpl
 from src.router.schemas import EventCreate, EventUpdate, EventResponse
 
 
 router = APIRouter(prefix="/events", tags=["events"])
-event_repository = EventRepository()
+event_repository = EventRepositoryImpl()
 
 
 @router.post("", response_model=EventResponse, status_code=201)

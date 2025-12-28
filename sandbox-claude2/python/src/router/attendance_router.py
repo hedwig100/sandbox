@@ -1,16 +1,16 @@
 from uuid import uuid4
 from fastapi import APIRouter, HTTPException
 from src.domain.attendance import Attendance
-from src.repository.attendance_repository import AttendanceRepository
-from src.repository.event_repository import EventRepository
-from src.repository.candidate_repository import CandidateRepository
+from src.infrastructure.attendance_repository_impl import AttendanceRepositoryImpl
+from src.infrastructure.event_repository_impl import EventRepositoryImpl
+from src.infrastructure.candidate_repository_impl import CandidateRepositoryImpl
 from src.router.schemas import AttendanceCreate, AttendanceUpdate, AttendanceResponse
 
 
 router = APIRouter(prefix="/attendance", tags=["attendance"])
-attendance_repository = AttendanceRepository()
-event_repository = EventRepository()
-candidate_repository = CandidateRepository()
+attendance_repository = AttendanceRepositoryImpl()
+event_repository = EventRepositoryImpl()
+candidate_repository = CandidateRepositoryImpl()
 
 
 @router.post("", response_model=AttendanceResponse, status_code=201)

@@ -1,47 +1,16 @@
-from datetime import datetime
+from abc import ABC, abstractmethod
 from src.domain.user import User
-from src.database.connection import get_db
 
 
-class UserRepository:
+class UserRepository(ABC):
+    @abstractmethod
     async def create(self, user: User) -> User:
-        async with get_db() as db:
-            await db.execute(
-                """
-                INSERT INTO users (id, name, created_at, updated_at)
-                VALUES (?, ?, ?, ?)
-                """,
-                (user.id, user.name, user.created_at.isoformat(), user.updated_at.isoformat())
-            )
-            await db.commit()
-            return user
+        pass
 
+    @abstractmethod
     async def find_by_id(self, user_id: str) -> User | None:
-        async with get_db() as db:
-            async with db.execute(
-                "SELECT * FROM users WHERE id = ?",
-                (user_id,)
-            ) as cursor:
-                row = await cursor.fetchone()
-                if row is None:
-                    return None
-                return User(
-                    id=row["id"],
-                    name=row["name"],
-                    created_at=datetime.fromisoformat(row["created_at"]),
-                    updated_at=datetime.fromisoformat(row["updated_at"])
-                )
+        pass
 
+    @abstractmethod
     async def find_all(self) -> list[User]:
-        async with get_db() as db:
-            async with db.execute("SELECT * FROM users") as cursor:
-                rows = await cursor.fetchall()
-                return [
-                    User(
-                        id=row["id"],
-                        name=row["name"],
-                        created_at=datetime.fromisoformat(row["created_at"]),
-                        updated_at=datetime.fromisoformat(row["updated_at"])
-                    )
-                    for row in rows
-                ]
+        pass

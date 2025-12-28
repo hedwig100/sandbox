@@ -2,12 +2,12 @@ from datetime import datetime
 from uuid import uuid4
 from fastapi import APIRouter, HTTPException
 from src.domain.user import User
-from src.repository.user_repository import UserRepository
+from src.infrastructure.user_repository_impl import UserRepositoryImpl
 from src.router.schemas import UserCreate, UserResponse
 
 
 router = APIRouter(prefix="/users", tags=["users"])
-user_repository = UserRepository()
+user_repository = UserRepositoryImpl()
 
 
 @router.post("", response_model=UserResponse, status_code=201)

@@ -1,14 +1,14 @@
 from uuid import uuid4
 from fastapi import APIRouter, HTTPException
 from src.domain.candidate import Candidate
-from src.repository.candidate_repository import CandidateRepository
-from src.repository.event_repository import EventRepository
+from src.infrastructure.candidate_repository_impl import CandidateRepositoryImpl
+from src.infrastructure.event_repository_impl import EventRepositoryImpl
 from src.router.schemas import CandidateUpdate, CandidateResponse
 
 
 router = APIRouter(prefix="/events/{event_id}/candidates", tags=["candidates"])
-candidate_repository = CandidateRepository()
-event_repository = EventRepository()
+candidate_repository = CandidateRepositoryImpl()
+event_repository = EventRepositoryImpl()
 
 
 @router.put("", response_model=list[CandidateResponse])
