@@ -1,0 +1,7 @@
+{
+    "headers": {
+        "Content-Length": 10,
+        "Content-Type": "multipart/form-data; boundary=---------aaaaaaaa"
+    },
+    "body": "---------aaaaaaaa\nContent-Disposition: form-data; name='hogehoge'; filename='aaa.png'\r\naleieo\n---------aaaaaaaa"
+}
