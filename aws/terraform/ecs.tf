@@ -31,6 +31,21 @@ resource "aws_iam_role_policy_attachment" "execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# Allow the execution role to read the DB password secret at task launch.
+resource "aws_iam_role_policy" "execution_secrets" {
+  name = "${var.name}-read-db-secret"
+  role = aws_iam_role.execution.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["secretsmanager:GetSecretValue"]
+      Resource = [aws_secretsmanager_secret.db_password.arn]
+    }]
+  })
+}
+
 # --- Task definition ---
 
 resource "aws_ecs_task_definition" "main" {
@@ -53,7 +68,14 @@ resource "aws_ecs_task_definition" "main" {
         }
       ]
       environment = [
-        { name = "PORT", value = tostring(var.container_port) }
+        { name = "PORT", value = tostring(var.container_port) },
+        { name = "DB_HOST", value = aws_db_instance.main.address },
+        { name = "DB_PORT", value = tostring(aws_db_instance.main.port) },
+        { name = "DB_NAME", value = var.db_name },
+        { name = "DB_USER", value = var.db_username },
+      ]
+      secrets = [
+        { name = "DB_PASSWORD", valueFrom = aws_secretsmanager_secret.db_password.arn },
       ]
       logConfiguration = {
         logDriver = "awslogs"

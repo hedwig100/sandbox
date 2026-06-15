@@ -23,14 +23,20 @@ terraform apply
 ```
 Internet ─▶ ALB(:80) ─▶ Target Group ─▶ ECS Service (Fargate, 2 tasks)
                                               └─ container :8080
+                                                    │ (SG: 5432 from ECS only)
+                                                    ▼
+                                        RDS PostgreSQL (private subnet ×2AZ)
+                                        password ← Secrets Manager で注入
 ```
-- VPC + パブリックサブネット2つ(2AZ) / IGW
-- SG: ALBは80を全開放、ECSはALBからのみ
+- VPC + パブリックサブネット2つ(ALB/ECS) + プライベートサブネット2つ(RDS) / IGW
+- SG: ALBは80を全開放、ECSはALBからのみ、RDSはECSからの5432のみ
 - ECR / CloudWatch Logs / IAM(task execution role)
+- RDS PostgreSQL(`db.t4g.micro`, single-AZ)/ Secrets Manager(DBパスワード)
 - ヘルスチェック: `/health`
 
 ## アプリのエンドポイント
-- `GET /` → `Hello from ECS! host=<container hostname>`(2台に分散するのが見える)
+- `GET /` → `Hello from ECS! host=<hostname> visits=<DBに記録した累計アクセス数>`
+  - DB未接続のローカル実行時は `... (no db)` を返す
 - `GET /health` → `ok`
 
 ## セットアップ(初回)

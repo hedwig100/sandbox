@@ -19,3 +19,8 @@ output "cluster_name" {
 output "service_name" {
   value = aws_ecs_service.main.name
 }
+
+output "db_endpoint" {
+  description = "RDS endpoint (reachable only from the ECS tasks)"
+  value       = aws_db_instance.main.address
+}

@@ -39,3 +39,21 @@ variable "memory" {
   type        = number
   default     = 512
 }
+
+variable "db_name" {
+  description = "Initial PostgreSQL database name"
+  type        = string
+  default     = "appdb"
+}
+
+variable "db_username" {
+  description = "PostgreSQL master username"
+  type        = string
+  default     = "appuser"
+}
+
+variable "db_instance_class" {
+  description = "RDS instance class"
+  type        = string
+  default     = "db.t4g.micro"
+}
