@@ -1,33 +1,91 @@
-# aws - ECS deploy practice app
+# aws - ECS deploy practice
 
-依存ゼロのPython製ミニWebアプリ。ECS(Fargate)へのデプロイ練習用。
+依存ゼロのPython製ミニWebアプリを、**ALB → ECS(Fargate)** 構成で全体公開。
+インフラは Terraform 管理、state は S3 backend(ネイティブロック)。
 
-## エンドポイント
-- `GET /` → `Hello from ECS! host=<container hostname>`
-- `GET /health` → `ok` (ヘルスチェック用)
+## 実行
 
-## ローカルで動かす
+```
+aws login
+cd terraform/bootstrap
+eval "$(aws configure export-credentials --format env)"
+  terraform -chdir=terraform/bootstrap plan
+eval "$(aws configure export-credentials --format env)"
+  terraform -chdir=terraform/bootstrap apply
+
+cd terraform
+terraform init -backend-config=backend.hcl
+terraform plan
+terraform apply
+```
+
+## 構成
+```
+Internet ─▶ ALB(:80) ─▶ Target Group ─▶ ECS Service (Fargate, 2 tasks)
+                                              └─ container :8080
+```
+- VPC + パブリックサブネット2つ(2AZ) / IGW
+- SG: ALBは80を全開放、ECSはALBからのみ
+- ECR / CloudWatch Logs / IAM(task execution role)
+- ヘルスチェック: `/health`
+
+## アプリのエンドポイント
+- `GET /` → `Hello from ECS! host=<container hostname>`(2台に分散するのが見える)
+- `GET /health` → `ok`
+
+## セットアップ(初回)
+```bash
+# 1. state バケット名を一意な値に変更
+#    terraform/backend.hcl の bucket = "ecs-sandbox-tfstate-change-me" を編集
+
+# 2. AWS 認証 (例: SSO)
+aws sso login   # or: export AWS_PROFILE=...
+
+# 3. state用S3バケットを作成 (bootstrap、ローカルstate、初回のみ)
+terraform -chdir=terraform/bootstrap init
+terraform -chdir=terraform/bootstrap apply \
+  -var "state_bucket=<backend.hclと同じバケット名>"
+
+# 4. メインstackをS3 backendで初期化
+terraform -chdir=terraform init -backend-config=backend.hcl
+```
+
+## インフラ操作(Terraformはそのまま)
+```bash
+terraform -chdir=terraform plan
+terraform -chdir=terraform apply
+terraform -chdir=terraform destroy
+```
+
+## コンテナのデプロイ
+インフラ(`apply`済み)に対して、イメージを build & push してローリング更新するだけ:
+```bash
+./deploy.sh
+```
+やること: ECRへ build/push → `aws ecs update-service --force-new-deployment` →
+App URL を表示。コードを変えるたびに叩けばOK。
+
+> 初回 `apply` 直後はECRにイメージが無いためタスクが起動失敗を繰り返します。
+> 一度 `./deploy.sh` でイメージをpushすればECSが自動でpullして立ち上がります。
+
+## 後片付け
+```bash
+terraform -chdir=terraform destroy
+# state バケットも消すなら
+terraform -chdir=terraform/bootstrap destroy -var "state_bucket=<your-bucket>"
+```
+
+## ローカルで動作確認だけしたい
 ```bash
 docker build -t ecs-sandbox .
 docker run --rm -p 8080:8080 ecs-sandbox
 curl localhost:8080
-curl localhost:8080/health
 ```
 
-## ECRへpush（例）
-```bash
-AWS_REGION=ap-northeast-1
-ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-REPO=ecs-sandbox
-
-aws ecr create-repository --repository-name $REPO --region $AWS_REGION
-aws ecr get-login-password --region $AWS_REGION \
-  | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-
-docker build -t $REPO .
-docker tag $REPO:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPO:latest
-docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPO:latest
-```
-
-あとはECSクラスタ/タスク定義/サービスを作って、コンテナポート `8080`、
-ヘルスチェックパス `/health` を指定すればOK。
+## 主な変数 (`terraform/variables.tf`)
+| 変数 | デフォルト | 用途 |
+|------|-----------|------|
+| `region` | `ap-northeast-1` | リージョン |
+| `desired_count` | `2` | タスク数 |
+| `container_port` | `8080` | コンテナ/TGのポート |
+| `cpu` / `memory` | `256` / `512` | Fargateサイズ |
