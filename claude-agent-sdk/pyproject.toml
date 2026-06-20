@@ -1,0 +1,28 @@
+[project]
+name = "claude-agent-sdk-sandbox"
+version = "0.1.0"
+description = "An agent built with the Claude Agent SDK: web fetch + SQLite (fetch/search) + Excel/PowerPoint readers."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "claude-agent-sdk>=0.1.0",
+    "openpyxl>=3.1.5",
+    "python-pptx>=1.0.2",
+]
+
+[project.scripts]
+agent = "agent.main:cli"
+seed = "agent.seed:main"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.6.1",
+    "black>=23.10.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["agent"]
