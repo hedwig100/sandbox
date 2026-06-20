@@ -1,64 +1,41 @@
-"""Tiny dependency-light web app that plays with DynamoDB via boto3.
+"""Tiny web app that reads/writes DynamoDB through the Pydantic + boto3 layer.
 
 Routes:
-  GET  /health        -> "ok"
-  GET  /              -> records a visit + bumps an atomic counter, returns the total
-  GET  /items         -> lists the most recent visit items (Scan)
-  PUT  /items/<key>   -> body becomes the item's "value" attribute (PutItem)
-  GET  /items/<key>   -> returns one item (GetItem)
+  GET  /health         -> "ok"
+  GET  /               -> record a visit + bump an atomic counter, return total
+  GET  /items          -> list recent visit items
+  GET  /items/<key>    -> get a KeyValue item
+  PUT  /items/<key>    -> body becomes the KeyValue "value" attribute
 
-DynamoDB access only works from inside the VPC (through the gateway endpoint)
-because of the table's resource policy -- so this is meant to run on ECS.
+  POST /orders         -> create an Order from a nested JSON body (validated)
+  GET  /orders         -> list orders
+  GET  /orders/<id>    -> get one order (id is the uuid part of "order#<id>")
+
+DynamoDB access only works from inside the VPC (through the gateway endpoint),
+so this is meant to run on ECS.
 """
 
 import json
 import os
 import socket
-import uuid
-from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-import boto3
-from boto3.dynamodb.conditions import Key  # noqa: F401  (handy when extending)
+from pydantic import ValidationError
+
+from dynamo import KeyValue, Order, Repository, Visit
 
 PORT = int(os.environ.get("PORT", "8080"))
-TABLE_NAME = os.environ.get("TABLE_NAME", "dynamodb-sandbox")
-REGION = os.environ.get("AWS_REGION", "ap-northeast-1")
 
-_table = boto3.resource("dynamodb", region_name=REGION).Table(TABLE_NAME)
+visits = Repository(Visit)
+kv = Repository(KeyValue)
+orders = Repository(Order)
 
 COUNTER_PK = "counter#visits"
-VISIT_PREFIX = "visit#"
 
 
-def record_visit():
-    """Store one visit item and atomically bump the running total."""
-    now = datetime.now(timezone.utc).isoformat()
-    _table.put_item(
-        Item={"pk": f"{VISIT_PREFIX}{uuid.uuid4()}", "ts": now, "host": socket.gethostname()}
-    )
-    resp = _table.update_item(
-        Key={"pk": COUNTER_PK},
-        UpdateExpression="ADD #n :one",
-        ExpressionAttributeNames={"#n": "n"},
-        ExpressionAttributeValues={":one": 1},
-        ReturnValues="UPDATED_NEW",
-    )
-    return int(resp["Attributes"]["n"])
-
-
-def list_items(limit=20):
-    items = _table.scan(Limit=limit).get("Items", [])
-    # DynamoDB Decimals aren't JSON-serializable; stringify defensively.
-    return json.loads(json.dumps(items, default=str))
-
-
-def put_item(key, value):
-    _table.put_item(Item={"pk": key, "value": value})
-
-
-def get_item(key):
-    return _table.get_item(Key={"pk": key}).get("Item")
+def _dump(model) -> dict:
+    """Pydantic model -> JSON-safe dict (datetime/enum become strings)."""
+    return model.model_dump(mode="json")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -67,19 +44,22 @@ class Handler(BaseHTTPRequestHandler):
             self._text(200, "ok")
         elif self.path == "/":
             try:
-                total = record_visit()
+                visits.put(Visit(host=socket.gethostname()))
+                total = visits.add(COUNTER_PK, "n")
                 self._text(200, f"Hello from ECS! host={socket.gethostname()} visits={total}")
             except Exception as e:  # don't let a DynamoDB hiccup 500 the page
                 self._text(200, f"Hello from ECS! host={socket.gethostname()} db_error={e}")
         elif self.path == "/items":
-            self._json(200, list_items())
+            self._json(200, [_dump(i) for i in visits.list_prefix("visit#")])
+        elif self.path == "/orders":
+            self._json(200, [_dump(o) for o in orders.list_prefix("order#")])
+        elif self.path.startswith("/orders/"):
+            pk = f"order#{self.path[len('/orders/'):]}"
+            o = orders.get(pk)
+            self._json(200, _dump(o)) if o else self._json(404, {"error": "not found", "pk": pk})
         elif self.path.startswith("/items/"):
-            key = self.path[len("/items/"):]
-            item = get_item(key)
-            if item is None:
-                self._json(404, {"error": "not found", "pk": key})
-            else:
-                self._json(200, json.loads(json.dumps(item, default=str)))
+            item = kv.get(self.path[len("/items/"):])
+            self._json(200, _dump(item)) if item else self._json(404, {"error": "not found"})
         else:
             self._text(404, "not found")
 
@@ -88,10 +68,27 @@ class Handler(BaseHTTPRequestHandler):
             self._text(404, "not found")
             return
         key = self.path[len("/items/"):]
+        item = kv.put(KeyValue(pk=key, value=self._body()))
+        self._json(200, _dump(item))
+
+    def do_POST(self):
+        if self.path != "/orders":
+            self._text(404, "not found")
+            return
+        try:
+            order = Order(**json.loads(self._body() or "{}"))
+        except ValidationError as e:  # schema validation failed -> 400 with details
+            self._json(400, {"error": "validation", "detail": json.loads(e.json())})
+            return
+        except json.JSONDecodeError:
+            self._json(400, {"error": "invalid json"})
+            return
+        orders.put(order)
+        self._json(201, _dump(order) | {"total": order.total})
+
+    def _body(self) -> str:
         length = int(self.headers.get("Content-Length", "0"))
-        value = self.rfile.read(length).decode() if length else ""
-        put_item(key, value)
-        self._json(200, {"pk": key, "value": value})
+        return self.rfile.read(length).decode() if length else ""
 
     def _text(self, code, body):
         self._send(code, "text/plain; charset=utf-8", body + "\n")
@@ -110,6 +107,5 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"table={TABLE_NAME} region={REGION}", flush=True)
     print(f"listening on :{PORT}", flush=True)
     HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()

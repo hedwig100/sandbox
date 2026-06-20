@@ -2,9 +2,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir "boto3==1.34.*"
+RUN pip install --no-cache-dir "boto3==1.34.*" "pydantic==2.*"
 
-COPY app.py .
+COPY app.py dynamo.py ./
 
 ENV PORT=8080
 EXPOSE 8080
