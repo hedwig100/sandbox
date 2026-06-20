@@ -1,0 +1,33 @@
+[project]
+name = "pydantic-ai-sandbox"
+version = "0.1.0"
+description = "An agent built with Pydantic AI: web fetch + SQLite (fetch/search) + Excel/PowerPoint readers."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic-ai-slim[anthropic,bedrock]>=0.0.49",
+    # CRT extras: awscrt is needed for SigV4a signing used by cross-region
+    # Bedrock inference profiles (e.g. the jp.*/apac.*/us.* prefixes).
+    "botocore[crt]>=1.34",
+    "openpyxl>=3.1.5",
+    "python-pptx>=1.0.2",
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+]
+
+[project.scripts]
+agent = "agent.main:cli"
+seed = "agent.seed:main"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.6.1",
+    "black>=23.10.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["agent"]
