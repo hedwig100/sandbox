@@ -1,0 +1,1 @@
+import{mkdirSync}from"node:fs";import{dirname}from"node:path";import{createChatService}from"./service";const path=process.env.TRIP_DB_PATH??"data/trips.sqlite";mkdirSync(dirname(path),{recursive:true});export const chatService=createChatService(path);

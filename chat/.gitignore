@@ -5,3 +5,7 @@ node_modules/
 coverage/
 *.log
 *.tsbuildinfo
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

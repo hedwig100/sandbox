@@ -61,5 +61,16 @@ export type TripEvent =
   | (EventBase & { type: "itinerary.itemAdded"; payload: ItineraryItem })
   | (EventBase & { type: "budget.updated"; payload: Partial<Budget> });
 
-export type ChatMessage = { id: string; role: "user" | "assistant"; content: string };
-export type ToolActivity = { id: string; name: string; status: "running" | "complete" | "error"; label: string };
+export type ToolActivity = { id: string; name: string; status: "running" | "completed" | "failed" | "complete" | "error"; label: string; createdAt?: string };
+export type ChatMessage = { id: string; role: "user" | "assistant"; content: string; status?: "pending" | "completed" | "failed"; createdAt?: string; activities?: ToolActivity[] };
+
+export type MutationSource = "user" | "agent";
+export type Trip = Omit<TripState, "appliedEventIds" | "candidates" | "itinerary"> & {
+  id: string;
+  version: number;
+  candidates: Array<Destination & { source: MutationSource; position: number }>;
+  itinerary: Array<ItineraryItem & { source: MutationSource; position: number }>;
+  createdAt: string;
+  updatedAt: string;
+};
+export type TripSummary = { id: string; destination?: string; dates?: { start: string; end: string }; travelers: number; budgetLimit?: number; itineraryCount: number; updatedAt: string };

@@ -1,10 +1,12 @@
-import type { TripEvent } from "../trip/types";
+import type { Trip, TripEvent } from "../trip/types";
 
 export type AgentStreamEvent =
   | { type: "assistant.delta"; delta: string }
+  | { type: "message.started"; userId: string; assistantId: string; createdAt: string }
   | { type: "tool.started"; id: string; name: string; label: string }
   | { type: "tool.completed"; id: string }
   | { type: "trip.event"; event: TripEvent }
+  | { type: "trip.snapshot"; trip: Trip }
   | { type: "response.completed" }
   | { type: "response.error"; message: string; code?: string };
 

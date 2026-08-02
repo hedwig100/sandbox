@@ -1,0 +1,1 @@
+import{chatService}from"@/server/chat/runtime";import{jsonError}from"@/server/trips/http";export async function GET(_:Request,{params}:{params:Promise<{tripId:string}>}){try{return Response.json(chatService.getHistory((await params).tripId))}catch(e){return jsonError(e)}}

@@ -12,6 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "better-sqlite3": "latest",
+    "drizzle-orm": "latest",
     "lucide-react": "latest",
     "next": "latest",
     "openai": "latest",
@@ -25,6 +27,8 @@
     "@testing-library/react": "latest",
     "@testing-library/user-event": "latest",
     "@types/node": "latest",
+    "@types/better-sqlite3": "latest",
+    "drizzle-kit": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "eslint": "latest",

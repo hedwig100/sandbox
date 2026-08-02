@@ -1,0 +1,2 @@
+import { tripService } from "@/server/trips/runtime"; import { body,jsonError } from "@/server/trips/http";
+export async function PATCH(request:Request,{params}:{params:Promise<{tripId:string}>}){try{const value=await body(request);return Response.json(tripService.updatePreferences({...value,tripId:(await params).tripId,source:"user"} as Parameters<typeof tripService.updatePreferences>[0]))}catch(e){return jsonError(e)}}
