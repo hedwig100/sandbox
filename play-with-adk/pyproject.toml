@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "python-template"
+version = "0.1.0"
+description = ""
+authors = [""]
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "^3.10"
+google-adk = "^1.16.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.6.1"
+black = "^23.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
